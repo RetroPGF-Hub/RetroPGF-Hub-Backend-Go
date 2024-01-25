@@ -17,6 +17,7 @@ type (
 		InsertOneUser(pctx context.Context, req *users.UserDb) (primitive.ObjectID, error)
 		FindOneUserWithId(pctx context.Context, userId primitive.ObjectID) (*users.UserDb, error)
 		IsUniqueUser(pctx context.Context, email string) (bool, error)
+		FindOneUserWithEmail(pctx context.Context, email string) (*users.UserDb, error)
 	}
 
 	usersRepository struct {
@@ -66,6 +67,22 @@ func (r *usersRepository) FindOneUserWithId(pctx context.Context, userId primiti
 	return result, nil
 }
 
+func (r *usersRepository) FindOneUserWithEmail(pctx context.Context, email string) (*users.UserDb, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.userDbConn(ctx)
+	col := db.Collection("users")
+
+	result := new(users.UserDb)
+
+	if err := col.FindOne(ctx, bson.M{"email": email}).Decode(result); err != nil {
+		return nil, errors.New("error: id not found")
+	}
+
+	return result, nil
+}
+
 func (r *usersRepository) IsUniqueUser(pctx context.Context, email string) (bool, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
@@ -79,9 +96,9 @@ func (r *usersRepository) IsUniqueUser(pctx context.Context, email string) (bool
 		return false, errors.New("error: checking user unique failed")
 	}
 	if count == 0 {
-		return true, nil
-	} else {
 		return false, nil
+	} else {
+		return true, nil
 	}
 
 }

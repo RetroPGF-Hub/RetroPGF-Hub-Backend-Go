@@ -32,6 +32,8 @@ type (
 		AccessDuration   int64
 		RefreshDuration  int64
 		ApiDuration      int64
+		PrivateKeyPem    string
+		PublicKeyPem     string
 	}
 
 	Grpc struct {
@@ -58,7 +60,8 @@ func LoadConfig(path string) Config {
 			AccessSecretKey:  os.Getenv("JWT_ACCESS_SECRET_KEY"),
 			RefreshSecretKey: os.Getenv("JWT_REFRESH_SECRET_KEY"),
 			ApiSecretKey:     os.Getenv("JWT_API_SECRET_KEY"),
-
+			PrivateKeyPem:    os.Getenv("PRIVATE_KEY_PEM"),
+			PublicKeyPem:     os.Getenv("PUBLIC_KEY_PEM"),
 			AccessDuration: func() int64 {
 				result, err := strconv.ParseInt(os.Getenv("JWT_ACCESS_DURATION"), 10, 64)
 				if err != nil {

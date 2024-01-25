@@ -18,9 +18,9 @@ type (
 		Reason         string             `bson:"reason"`
 		Category       string             `bson:"category"`
 		Contact        string             `bson:"contact"`
-		CreatedBy      primitive.ObjectID `bson:"create_by"`
-		CreateAt       time.Time          `bson:"create_at"`
-		UpdatedAt      time.Time          `bson:"create_at"`
+		CreatedBy      primitive.ObjectID `bson:"created_by"`
+		CreateAt       time.Time          `bson:"created_at"`
+		UpdatedAt      time.Time          `bson:"updated_at"`
 	}
 )
 

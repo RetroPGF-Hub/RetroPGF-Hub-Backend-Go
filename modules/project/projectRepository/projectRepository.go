@@ -60,7 +60,7 @@ func (r *projectRepository) FindOneProject(pctx context.Context, projectId primi
 	result := new(project.ProjectModel)
 
 	if err := col.FindOne(ctx, bson.M{"_id": projectId}).Decode(result); err != nil {
-		return nil, errors.New("error: id not found")
+		return nil, errors.New("error: project id not found")
 	}
 
 	return result, nil

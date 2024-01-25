@@ -72,6 +72,11 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	// app.Settings.MaxRequestBodySize = 10 * 1024 * 1024 // 10 MB
 
 	// Call the server service here
+	switch s.cfg.App.Name {
+	case "users":
+		s.usersService()
+	}
+
 	s.app.Use(middleware.Logger())
 
 	// Graceful Shutdown

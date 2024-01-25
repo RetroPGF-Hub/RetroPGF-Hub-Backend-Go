@@ -16,3 +16,5 @@ func NewProjectRepo(projectRepo projectrepository.ProjectRepositoryService) Proj
 		projectRepo: projectRepo,
 	}
 }
+
+// func (u *projectUsecase) CreateNewProject(pctx context.Context)

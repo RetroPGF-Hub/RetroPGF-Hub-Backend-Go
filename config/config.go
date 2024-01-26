@@ -46,6 +46,7 @@ func LoadConfig(path string) Config {
 	if err := godotenv.Load(path); err != nil {
 		log.Fatal("Error loading .env file : %s", err.Error())
 	}
+	log.Println(os.Getenv("JWT_API_SECRET_KEY"))
 
 	return Config{
 		App: App{

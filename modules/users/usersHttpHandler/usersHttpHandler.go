@@ -106,11 +106,10 @@ func (h *usersHttpHandler) LoginUser(c echo.Context) error {
 		Expires:  oneWeek,
 	})
 
-	return response.SuccessResponse(c, http.StatusCreated, map[string]any{
+	return response.SuccessResponse(c, http.StatusOK, map[string]any{
 		"msg":  "ok",
 		"user": res,
 	})
-
 }
 
 func (h *usersHttpHandler) LogOutUser(c echo.Context) error {
@@ -130,7 +129,7 @@ func (h *usersHttpHandler) LogOutUser(c echo.Context) error {
 		Expires:  time.Unix(0, 0),
 	})
 
-	return response.SuccessResponse(c, http.StatusCreated, map[string]any{
+	return response.SuccessResponse(c, http.StatusOK, map[string]any{
 		"msg": "logout success",
 	})
 

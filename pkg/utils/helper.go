@@ -3,6 +3,8 @@ package utils
 import (
 	"log"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func LocalTime() time.Time {
@@ -17,4 +19,9 @@ func ConvertStringTimeToTime(t string) time.Time {
 		log.Printf("Error: Parse time failed: %s", err.Error())
 	}
 	return result
+}
+
+func ConvertToObjectId(id string) primitive.ObjectID {
+	objectId, _ := primitive.ObjectIDFromHex(id)
+	return objectId
 }

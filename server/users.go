@@ -14,5 +14,5 @@ func (s *server) usersService() {
 	users := s.app.Group("/users_v1")
 	users.POST("/register", usersHttpHandler.RegisterUser)
 	users.POST("/login", usersHttpHandler.LoginUser)
-
+	users.GET("/logout", usersHttpHandler.LogOutUser)
 }

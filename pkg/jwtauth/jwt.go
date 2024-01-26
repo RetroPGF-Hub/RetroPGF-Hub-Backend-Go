@@ -120,10 +120,26 @@ func jwtTimeDurationCal(t int64) *jwt.NumericDate {
 	return jwt.NewNumericDate(now().Add(time.Duration(t * int64(math.Pow10(9)))))
 }
 
-func NewApiKey(secret string) AuthFactory {
+func NewApiKey(privateKeyPem string, secret string) AuthFactory {
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(privateKeyPem))
+	// privateKey, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(prvKey))
+	if err != nil {
+		return &apiKey{
+			authConcrete: &authConcrete{
+				Secret:     nil,
+				PrivateKey: nil,
+				Claims: &AuthMapClaims{
+					Claims:           &Claims{},
+					RegisteredClaims: jwt.RegisteredClaims{},
+				},
+			},
+		}
+	}
+
 	return &apiKey{
 		authConcrete: &authConcrete{
-			Secret: []byte(secret),
+			Secret:     []byte(secret),
+			PrivateKey: privateKey,
 			Claims: &AuthMapClaims{
 				Claims: &Claims{},
 				RegisteredClaims: jwt.RegisteredClaims{
@@ -170,9 +186,12 @@ var apiKeyInstant string
 // Work only once
 var once sync.Once
 
-func SetApiKey(secret string) {
+func SetApiKey(cfg *config.Jwt) {
 	once.Do(func() {
-		apiKeyInstant, _ = NewApiKey(secret).SignToken()
+		apiKeyInstant, _ = NewApiKey(cfg.PrivateKeyPem, cfg.ApiSecretKey).SignToken()
+		// apiKeyInstant := NewApiKey(secret)
+		// _ = apiKeyInstant
+		// log.Printf("%+v", apiKeyInstant)
 	})
 }
 

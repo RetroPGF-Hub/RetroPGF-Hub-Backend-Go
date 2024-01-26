@@ -3,6 +3,7 @@ package usersusecase
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users"
+	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
 	usersrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersRepository"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
@@ -17,6 +18,7 @@ type (
 	UsersUsecaseService interface {
 		RegisterUserUsecase(cfg *config.Config, pctx context.Context, req *users.RegisterUserReq) (string, *users.UserProfileRes, error)
 		LoginUsecase(cfg *config.Config, pctx context.Context, email, password string) (string, *users.UserProfileRes, error)
+		FindUserByIdUsecase(pctx context.Context, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error)
 	}
 
 	usersUsecase struct {
@@ -62,7 +64,7 @@ func (u *usersUsecase) RegisterUserUsecase(cfg *config.Config, pctx context.Cont
 		return "", nil, err
 	}
 
-	user, err := u.usersRepo.FindOneUserWithId(pctx, userId)
+	user, err := u.usersRepo.FindOneUserWithIdWithPassword(pctx, userId)
 	if err != nil {
 		return "", nil, err
 	}
@@ -100,7 +102,7 @@ func (u *usersUsecase) LoginUsecase(cfg *config.Config, pctx context.Context, em
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(password)); err != nil {
-		return "", nil, errors.New("error: password invalid")
+		return "", nil, errors.New("error: email or password invalid")
 	}
 
 	accessToken, err := jwtauth.NewAccessToken(

@@ -18,7 +18,9 @@ type (
 		Reason         string             `bson:"reason"`
 		Category       string             `bson:"category"`
 		Contact        string             `bson:"contact"`
-		CreatedBy      primitive.ObjectID `bson:"created_by"`
+		FavCount       int64              `bson:"fav_count"`
+		CommentCount   int64              `bson:"comment_count"`
+		CreatedBy      string             `bson:"created_by"`
 		CreateAt       time.Time          `bson:"created_at"`
 		UpdatedAt      time.Time          `bson:"updated_at"`
 	}

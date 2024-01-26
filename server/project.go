@@ -8,8 +8,9 @@ import (
 
 func (s *server) projectService() {
 	projectRepo := projectrepository.NewProjectRepository(s.db)
-	projectUsecase := projectusecase.NewProjectRepo(projectRepo)
+	projectUsecase := projectusecase.NewProjectUsecase(projectRepo)
 	projectHttpHandler := projecthttphandler.NewProjectHttpHandler(projectUsecase)
 
-	_ = projectHttpHandler
+	projects := s.app.Group("/project_v1")
+	projects.POST("/create", projectHttpHandler.CreateNewProjectHttp, s.middleware.JwtAuthorization)
 }

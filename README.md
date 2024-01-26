@@ -4,6 +4,15 @@ export PATH="$PATH:$(go env GOPATH)/bin"
 openssl genrsa -out cert/key_rsa 1024
 openssl rsa -in cert/key_rsa -pubout -out cert/key_rsa.pub
 
+## GRPC
+### Export path
+export PATH="$PATH:$(go env GOPATH)/bin"
+```
+protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    modules/users/usersPb/usersPb.proto
+```
+
 ## db diagram
 
 ```

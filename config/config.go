@@ -10,9 +10,10 @@ import (
 
 type (
 	Config struct {
-		App App
-		Db  Db
-		Jwt Jwt
+		App  App
+		Db   Db
+		Jwt  Jwt
+		Grpc Grpc
 	}
 
 	App struct {
@@ -32,6 +33,8 @@ type (
 		AccessDuration   int64
 		RefreshDuration  int64
 		ApiDuration      int64
+		PrivateKeyPem    string
+		PublicKeyPem     string
 	}
 
 	Grpc struct {
@@ -44,6 +47,7 @@ func LoadConfig(path string) Config {
 	if err := godotenv.Load(path); err != nil {
 		log.Fatal("Error loading .env file : %s", err.Error())
 	}
+	log.Println(os.Getenv("JWT_API_SECRET_KEY"))
 
 	return Config{
 		App: App{
@@ -58,7 +62,8 @@ func LoadConfig(path string) Config {
 			AccessSecretKey:  os.Getenv("JWT_ACCESS_SECRET_KEY"),
 			RefreshSecretKey: os.Getenv("JWT_REFRESH_SECRET_KEY"),
 			ApiSecretKey:     os.Getenv("JWT_API_SECRET_KEY"),
-
+			PrivateKeyPem:    os.Getenv("PRIVATE_KEY_PEM"),
+			PublicKeyPem:     os.Getenv("PUBLIC_KEY_PEM"),
 			AccessDuration: func() int64 {
 				result, err := strconv.ParseInt(os.Getenv("JWT_ACCESS_DURATION"), 10, 64)
 				if err != nil {
@@ -74,6 +79,10 @@ func LoadConfig(path string) Config {
 				}
 				return result
 			}(),
+		},
+		Grpc: Grpc{
+			UserUrl:    os.Getenv("GRPC_USERS_URL"),
+			ProjectUrl: os.Getenv("GRPC_PROJECT_URL"),
 		},
 	}
 

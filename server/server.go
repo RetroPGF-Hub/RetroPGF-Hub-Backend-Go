@@ -2,6 +2,9 @@ package server
 
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
+	middlewarehttphandler "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareHttpHandler"
+	middlewareusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareUsecase"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
 	"context"
 	"log"
 	"net/http"
@@ -17,13 +20,17 @@ import (
 
 type (
 	server struct {
-		app *echo.Echo
-		db  *mongo.Client
-		cfg *config.Config
-		// middleware middlewarehandler.MiddlewareHandlerService
-
+		app        *echo.Echo
+		db         *mongo.Client
+		cfg        *config.Config
+		middleware middlewarehttphandler.MiddlewareHttpHandlerService
 	}
 )
+
+func newMiddleware(cfg *config.Config) middlewarehttphandler.MiddlewareHttpHandlerService {
+	usecase := middlewareusecase.NewMiddlewareUsecase()
+	return middlewarehttphandler.NewMiddlewareHttpHandler(cfg, usecase)
+}
 
 func (s *server) gracefulShutdown(pctx context.Context, quit <-chan os.Signal) {
 
@@ -48,10 +55,13 @@ func (s *server) httpListening() {
 
 func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	s := &server{
-		db:  db,
-		cfg: cfg,
-		app: echo.New(),
+		db:         db,
+		cfg:        cfg,
+		app:        echo.New(),
+		middleware: newMiddleware(cfg),
 	}
+
+	jwtauth.SetApiKey(&cfg.Jwt)
 
 	// Request Timeout
 	s.app.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
@@ -72,6 +82,13 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	// app.Settings.MaxRequestBodySize = 10 * 1024 * 1024 // 10 MB
 
 	// Call the server service here
+	switch s.cfg.App.Name {
+	case "users":
+		s.usersService()
+	case "project":
+		s.projectService()
+	}
+
 	s.app.Use(middleware.Logger())
 
 	// Graceful Shutdown

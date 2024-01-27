@@ -1,0 +1,17 @@
+version: '3.8'
+name: retro-pgf-hub
+services:
+
+  users-db:
+    image: mongo
+    container_name: users-db
+    ports:
+    - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    volumes:
+      - mongo_data:/var/lib/mongo/users
+
+volumes:
+  mongo_data:

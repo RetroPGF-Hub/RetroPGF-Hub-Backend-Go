@@ -17,6 +17,6 @@ func NewusersGrpcHandler(usersUsecase usersusecase.UsersUsecaseService) *usersGr
 	return &usersGrpcHandler{usersUsecase: usersUsecase}
 }
 
-func (g *usersGrpcHandler) FindUserById(ctx context.Context, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error) {
+func (g *usersGrpcHandler) GetUserInfoById(ctx context.Context, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error) {
 	return g.usersUsecase.FindUserByIdUsecase(ctx, req)
 }

@@ -3,6 +3,9 @@
 users:
 	go run main.go ./env/.env.users
 
+project:
+	go run main.go ./env/.env.project
+
 db-up:
 	docker compose -f docker-compose.db.yaml up -d
 

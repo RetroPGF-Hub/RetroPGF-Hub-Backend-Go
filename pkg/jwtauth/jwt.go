@@ -196,5 +196,5 @@ func SetApiKey(cfg *config.Jwt) {
 }
 
 func SetApiKeyInContext(pctx *context.Context) {
-	*pctx = metadata.NewOutgoingContext(*pctx, metadata.Pairs("accessToken", apiKeyInstant))
+	*pctx = metadata.NewOutgoingContext(*pctx, metadata.Pairs("auth", apiKeyInstant))
 }

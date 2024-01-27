@@ -4,9 +4,12 @@ import (
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
 	"context"
+	"fmt"
 )
 
 func (u *usersUsecase) FindUserByIdUsecase(pctx context.Context, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error) {
+
+	fmt.Println("running")
 	user, err := u.usersRepo.FindOneUserWithId(pctx, utils.ConvertToObjectId(req.UserId))
 	if err != nil {
 		return nil, err

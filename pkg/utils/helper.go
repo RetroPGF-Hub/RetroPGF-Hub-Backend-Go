@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -10,6 +11,15 @@ import (
 func LocalTime() time.Time {
 	loc, _ := time.LoadLocation("Asia/Bangkok")
 	return time.Now().In(loc)
+}
+
+func LocationTime() (*time.Location, error) {
+	loc, err := time.LoadLocation("Asia/Bangkok")
+	if err != nil {
+		log.Printf("Error: handle sending failed: %s", err.Error())
+		return nil, errors.New("error: failed to load location")
+	}
+	return loc, nil
 }
 
 func ConvertStringTimeToTime(t string) time.Time {

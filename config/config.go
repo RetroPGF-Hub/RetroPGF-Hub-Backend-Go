@@ -10,9 +10,10 @@ import (
 
 type (
 	Config struct {
-		App App
-		Db  Db
-		Jwt Jwt
+		App  App
+		Db   Db
+		Jwt  Jwt
+		Grpc Grpc
 	}
 
 	App struct {
@@ -78,6 +79,10 @@ func LoadConfig(path string) Config {
 				}
 				return result
 			}(),
+		},
+		Grpc: Grpc{
+			UserUrl:    os.Getenv("GRPC_USERS_URL"),
+			ProjectUrl: os.Getenv("GRPC_PROJECT_URL"),
 		},
 	}
 

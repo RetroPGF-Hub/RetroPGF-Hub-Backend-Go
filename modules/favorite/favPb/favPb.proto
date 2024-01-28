@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+// Package name
+option go_package = "RetroPGF-Hub/RetroPGF-Hub-Backend-Go";
+
+
+// Structures
+message CreateFavProjectReq {
+    string projectId = 1;
+}
+message CreateFavProjectRes {
+    string msg = 1;
+}
+
+// Method
+service FavGrpcService {
+    rpc CreateFavProject(CreateFavProjectReq) returns (CreateFavProjectRes);
+}

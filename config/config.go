@@ -40,6 +40,7 @@ type (
 	Grpc struct {
 		UserUrl    string
 		ProjectUrl string
+		FavComUrl  string
 	}
 )
 
@@ -83,6 +84,7 @@ func LoadConfig(path string) Config {
 		Grpc: Grpc{
 			UserUrl:    os.Getenv("GRPC_USERS_URL"),
 			ProjectUrl: os.Getenv("GRPC_PROJECT_URL"),
+			FavComUrl:  os.Getenv("GRPC_FAV_COM_URL"),
 		},
 	}
 

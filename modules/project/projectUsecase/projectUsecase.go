@@ -15,7 +15,7 @@ import (
 
 type (
 	ProjectUsecaseService interface {
-		CreateNewProjectUsecase(pctx context.Context, req *project.InsertProjectReq) (*project.ProjectRes, error)
+		CreateNewProjectUsecase(pctx context.Context, req *project.InsertProjectReq, cfg *config.Grpc) (*project.ProjectRes, error)
 		FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.ProjectResWithUser, error)
 		UpdateOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string, req *project.InsertProjectReq) (*project.ProjectResWithUser, error)
 		DeleteOneProjectUsecase(pctx context.Context, projectId, userId string) error
@@ -32,7 +32,7 @@ func NewProjectUsecase(projectRepo projectrepository.ProjectRepositoryService) P
 	}
 }
 
-func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, req *project.InsertProjectReq) (*project.ProjectRes, error) {
+func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, req *project.InsertProjectReq, cfg *config.Grpc) (*project.ProjectRes, error) {
 	projectId, err := u.projectRepo.InsertOneProject(pctx, &project.ProjectModel{
 		Id:             primitive.NewObjectID(),
 		Name:           req.Name,
@@ -49,7 +49,7 @@ func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, req *proj
 		CreatedBy:      req.CreatedBy,
 		CreateAt:       utils.LocalTime(),
 		UpdatedAt:      utils.LocalTime(),
-	})
+	}, cfg.FavComUrl)
 	if err != nil {
 		return nil, err
 	}

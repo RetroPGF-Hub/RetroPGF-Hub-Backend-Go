@@ -45,12 +45,16 @@ func (h *projectHttpHandler) CreateNewProjectHttp(c echo.Context) error {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
 	userId := c.Get("user_id").(string)
+	if len(userId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
+	}
+
 	req.CreatedBy = userId
 	// email := c.Get("email")
 	// source := c.Get("source")
 	// fmt.Println(userId, email, source)
 
-	res, err := h.projectUsecase.CreateNewProjectUsecase(ctx, req)
+	res, err := h.projectUsecase.CreateNewProjectUsecase(ctx, req, &h.cfg.Grpc)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
@@ -66,8 +70,14 @@ func (h *projectHttpHandler) FindOneProjectHttp(c echo.Context) error {
 	ctx := context.Background()
 
 	projectId := c.Param("projectId")
+	if len(projectId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "projectId is required")
+	}
 
 	userId := c.Get("user_id").(string)
+	if len(userId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
+	}
 
 	res, err := h.projectUsecase.FindOneProjectUsecase(ctx, &h.cfg.Grpc, projectId, userId)
 	if err != nil {
@@ -86,6 +96,9 @@ func (h *projectHttpHandler) DeleteOneProjectHttp(c echo.Context) error {
 	projectId := c.Param("projectId")
 
 	userId := c.Get("user_id").(string)
+	if len(userId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
+	}
 
 	err := h.projectUsecase.DeleteOneProjectUsecase(ctx, projectId, userId)
 	if err != nil {
@@ -107,9 +120,16 @@ func (h *projectHttpHandler) UpdateOneProjectHttp(c echo.Context) error {
 	if err := wrapper.Bind(req); err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
+
 	projectId := c.Param("projectId")
+	if len(projectId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "projectId is required")
+	}
 
 	userId := c.Get("user_id").(string)
+	if len(userId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
+	}
 
 	res, err := h.projectUsecase.UpdateOneProjectUsecase(ctx, &h.cfg.Grpc, userId, projectId, req)
 	if err != nil {

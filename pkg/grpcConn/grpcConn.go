@@ -2,6 +2,7 @@ package grpcconn
 
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
+	favPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favPb"
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
 	"context"
@@ -17,6 +18,7 @@ import (
 type (
 	GrpcClientFactoryHandler interface {
 		Users() usersPb.UsersGrpcServiceClient
+		FavAndCom() favPb.FavGrpcServiceClient
 	}
 
 	grpcClientFactory struct {
@@ -32,6 +34,11 @@ type (
 func (g *grpcClientFactory) Users() usersPb.UsersGrpcServiceClient {
 	return usersPb.NewUsersGrpcServiceClient(g.client)
 }
+
+func (g *grpcClientFactory) FavAndCom() favPb.FavGrpcServiceClient {
+	return favPb.NewFavGrpcServiceClient(g.client)
+}
+
 func NewGrpcClient(host string) (GrpcClientFactoryHandler, error) {
 	opts := make([]grpc.DialOption, 0)
 

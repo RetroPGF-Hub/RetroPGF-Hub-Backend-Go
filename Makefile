@@ -23,6 +23,11 @@ grpc-fav:
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		modules/favorite/favPb/favPb.proto
 
+grpc-com: 
+	protoc --go_out=. --go_opt=paths=source_relative \
+		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+		modules/comment/commentPb/commentPb.proto
+
 grpc-users: 
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \

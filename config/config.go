@@ -40,15 +40,15 @@ type (
 	Grpc struct {
 		UserUrl    string
 		ProjectUrl string
-		FavComUrl  string
+		FavUrl     string
+		CommentUrl string
 	}
 )
 
 func LoadConfig(path string) Config {
 	if err := godotenv.Load(path); err != nil {
-		log.Fatal("Error loading .env file : %s", err.Error())
+		log.Fatalf("Error loading .env file : %s", err.Error())
 	}
-	log.Println(os.Getenv("JWT_API_SECRET_KEY"))
 
 	return Config{
 		App: App{
@@ -84,7 +84,8 @@ func LoadConfig(path string) Config {
 		Grpc: Grpc{
 			UserUrl:    os.Getenv("GRPC_USERS_URL"),
 			ProjectUrl: os.Getenv("GRPC_PROJECT_URL"),
-			FavComUrl:  os.Getenv("GRPC_FAV_COM_URL"),
+			FavUrl:     os.Getenv("GRPC_FAV_URL"),
+			CommentUrl: os.Getenv("GRPC_COM_URL"),
 		},
 	}
 

@@ -28,3 +28,12 @@ func (g *favGrpcHandler) CreateFavProject(ctx context.Context, req *favPb.Create
 		Msg: "create fav succes",
 	}, nil
 }
+
+func (g *favGrpcHandler) DeleteFavProject(ctx context.Context, req *favPb.DeleteFavProjectReq) (*favPb.DeleteFavProjectRes, error) {
+	if err := g.favUsecase.DeleteFavUsecase(ctx, req); err != nil {
+		return nil, err
+	}
+	return &favPb.DeleteFavProjectRes{
+		Msg: "delete fav succes",
+	}, nil
+}

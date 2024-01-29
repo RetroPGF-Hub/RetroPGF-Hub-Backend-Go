@@ -13,6 +13,7 @@ type (
 	FavoriteUsecaseService interface {
 		FavPullOrPushUsecase(pctx context.Context, projectId, userId string) (string, error)
 		InsertEmptyDoc(pctx context.Context, req *favPb.CreateFavProjectReq) error
+		DeleteFavUsecase(pctx context.Context, req *favPb.DeleteFavProjectReq) error
 	}
 
 	favoriteUsecase struct {
@@ -71,6 +72,14 @@ func (u *favoriteUsecase) InsertEmptyDoc(pctx context.Context, req *favPb.Create
 		CreateAt:  utils.LocalTime(),
 		UpdatedAt: utils.LocalTime(),
 	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// for grpc cancel project
+func (u *favoriteUsecase) DeleteFavUsecase(pctx context.Context, req *favPb.DeleteFavProjectReq) error {
+	if err := u.favoriteRepo.DeleteFav(pctx, utils.ConvertToObjectId(req.ProjectId)); err != nil {
 		return err
 	}
 	return nil

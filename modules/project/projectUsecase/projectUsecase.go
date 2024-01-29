@@ -49,8 +49,29 @@ func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, req *proj
 		CreatedBy:      req.CreatedBy,
 		CreateAt:       utils.LocalTime(),
 		UpdatedAt:      utils.LocalTime(),
-	}, cfg.FavComUrl)
+	}, cfg.FavUrl)
 	if err != nil {
+		return nil, err
+	}
+
+	// create empty docs to fav using grpc
+	// in case someething wrong with this grpc conn the project going to ge remove
+	if err := u.projectRepo.InsertEmptyFav(pctx, projectId, cfg.FavUrl); err != nil {
+		if err := u.projectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
+			return nil, err
+		}
+		return nil, err
+	}
+
+	// create empty docs to comment using grpc
+	// in case someething wrong with this grpc conn the project going to ge remove
+	if err := u.projectRepo.InsertEmptyComment(pctx, projectId, cfg.CommentUrl); err != nil {
+		if err := u.projectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
+			return nil, err
+		}
+		if _, err := u.projectRepo.DeleteFavProject(pctx, projectId, cfg.FavUrl); err != nil {
+			return nil, err
+		}
 		return nil, err
 	}
 

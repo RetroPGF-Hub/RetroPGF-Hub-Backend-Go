@@ -14,18 +14,17 @@ func (s *server) favoriteService() {
 	favoriteUsecase := favoriteusecase.NewFavoriteUsecase(favoriteRepo)
 	favoriteHttpHandler := favoritehttphandler.NewFavoriteHttpHandler(favoriteUsecase)
 
-	userGrpc := favoritehttphandler.NewfavGrpcHandler(favoriteUsecase)
+	favGrpc := favoritehttphandler.NewfavGrpcHandler(favoriteUsecase)
 	// Grpc client
 	go func() {
-		log.Println(s.cfg.Grpc.UserUrl)
-		grpcServer, lis := grpcconn.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.FavComUrl)
+		grpcServer, lis := grpcconn.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.FavUrl)
 
-		favPb.RegisterFavGrpcServiceServer(grpcServer, userGrpc)
+		favPb.RegisterFavGrpcServiceServer(grpcServer, favGrpc)
 
-		log.Printf("Favorite grpc listening on %s", s.cfg.Grpc.FavComUrl)
+		log.Printf("Favorite grpc listening on %s", s.cfg.Grpc.FavUrl)
 		grpcServer.Serve(lis)
 	}()
 
-	favorites := s.app.Group("/fav_or_com_v1")
+	favorites := s.app.Group("/fav_v1")
 	favorites.POST("/push-pull-fav/:projectId", favoriteHttpHandler.FavPullOrPushHttp, s.middleware.JwtAuthorization)
 }

@@ -50,9 +50,6 @@ func (h *projectHttpHandler) CreateNewProjectHttp(c echo.Context) error {
 	}
 
 	req.CreatedBy = userId
-	// email := c.Get("email")
-	// source := c.Get("source")
-	// fmt.Println(userId, email, source)
 
 	res, err := h.projectUsecase.CreateNewProjectUsecase(ctx, req, &h.cfg.Grpc)
 	if err != nil {

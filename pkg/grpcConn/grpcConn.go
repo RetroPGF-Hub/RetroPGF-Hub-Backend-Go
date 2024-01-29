@@ -2,7 +2,9 @@ package grpcconn
 
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
+	commentPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentPb"
 	favPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favPb"
+
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
 	"context"
@@ -18,7 +20,8 @@ import (
 type (
 	GrpcClientFactoryHandler interface {
 		Users() usersPb.UsersGrpcServiceClient
-		FavAndCom() favPb.FavGrpcServiceClient
+		Fav() favPb.FavGrpcServiceClient
+		Comment() commentPb.CommentGrpcServiceClient
 	}
 
 	grpcClientFactory struct {
@@ -35,8 +38,11 @@ func (g *grpcClientFactory) Users() usersPb.UsersGrpcServiceClient {
 	return usersPb.NewUsersGrpcServiceClient(g.client)
 }
 
-func (g *grpcClientFactory) FavAndCom() favPb.FavGrpcServiceClient {
+func (g *grpcClientFactory) Fav() favPb.FavGrpcServiceClient {
 	return favPb.NewFavGrpcServiceClient(g.client)
+}
+func (g *grpcClientFactory) Comment() commentPb.CommentGrpcServiceClient {
+	return commentPb.NewCommentGrpcServiceClient(g.client)
 }
 
 func NewGrpcClient(host string) (GrpcClientFactoryHandler, error) {

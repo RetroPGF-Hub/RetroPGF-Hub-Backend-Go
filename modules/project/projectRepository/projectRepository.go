@@ -1,10 +1,12 @@
 package projectrepository
 
 import (
+	commentPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentPb"
 	favPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favPb"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project"
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
 	grpcconn "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/grpcConn"
+
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
 	"context"
 	"errors"
@@ -24,6 +26,9 @@ type (
 		FindOneUserWithId(pctx context.Context, grpcUrl string, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error)
 		UpdateProject(pctx context.Context, req *project.ProjectModel, userId string) (*project.ProjectModel, error)
 		DeleteProject(pctx context.Context, projectId primitive.ObjectID, userId string) error
+		InsertEmptyFav(pctx context.Context, projectId primitive.ObjectID, favGrpcUrl string) error
+		InsertEmptyComment(pctx context.Context, projectId primitive.ObjectID, commentGrpcUrl string) error
+		DeleteFavProject(pctx context.Context, projectId primitive.ObjectID, grpcUrl string) (*favPb.DeleteFavProjectRes, error)
 	}
 
 	projectRepository struct {
@@ -41,7 +46,6 @@ func NewProjectRepository(db *mongo.Client) ProjectRepositoryService {
 	}
 }
 
-// make grpc conn to create fav document # project -> fav
 func (r *projectRepository) InsertOneProject(pctx context.Context, req *project.ProjectModel, favGrpcUrl string) (primitive.ObjectID, error) {
 
 	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
@@ -54,23 +58,6 @@ func (r *projectRepository) InsertOneProject(pctx context.Context, req *project.
 		log.Printf("Error: InsertOneProject: %s", err.Error())
 		return primitive.NilObjectID, errors.New("error: insert one project fail")
 	}
-
-	jwtauth.SetApiKeyInContext(&ctx)
-	conn, err := grpcconn.NewGrpcClient(favGrpcUrl)
-	if err != nil {
-		log.Printf("Error: Grpc Conn Error %s", err.Error())
-		return primitive.NilObjectID, errors.New("error: grpc connection failed")
-	}
-
-	// Calling CredentialSearch in file projectGrpcHandler
-	result, err := conn.FavAndCom().CreateFavProject(ctx, &favPb.CreateFavProjectReq{
-		ProjectId: req.Id.Hex(),
-	})
-	if err != nil {
-		log.Printf("Error: Create Fav For Project Error %s", err.Error())
-		return primitive.NilObjectID, errors.New(result.Msg)
-	}
-
 	return projectId.InsertedID.(primitive.ObjectID), nil
 
 }
@@ -86,26 +73,6 @@ func (r *projectRepository) FindOneProject(pctx context.Context, projectId primi
 
 	if err := col.FindOne(ctx, bson.M{"_id": projectId}).Decode(result); err != nil {
 		return nil, errors.New("error: project id not found")
-	}
-
-	return result, nil
-}
-
-// make grpc conn to get info of user # project -> user
-func (r *projectRepository) FindOneUserWithId(pctx context.Context, grpcUrl string, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error) {
-	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
-	defer cancel()
-
-	jwtauth.SetApiKeyInContext(&ctx)
-	conn, err := grpcconn.NewGrpcClient(grpcUrl)
-	if err != nil {
-		log.Printf("Error: Grpc Conn Error %s", err.Error())
-		return nil, errors.New("error: grpc connection failed")
-	}
-	result, err := conn.Users().GetUserInfoById(ctx, req)
-	if err != nil {
-		log.Printf("Error: Find One User For Project Error %s", err.Error())
-		return nil, errors.New("error: find out user for project not found")
 	}
 
 	return result, nil
@@ -168,4 +135,88 @@ func (r *projectRepository) DeleteProject(pctx context.Context, projectId primit
 
 	return nil
 
+}
+
+// make grpc conn to create fav document # project -> fav
+func (r *projectRepository) InsertEmptyFav(pctx context.Context, projectId primitive.ObjectID, favGrpcUrl string) error {
+	jwtauth.SetApiKeyInContext(&pctx)
+	conn, err := grpcconn.NewGrpcClient(favGrpcUrl)
+	if err != nil {
+		log.Printf("Error: Grpc Conn Error %s", err.Error())
+		return errors.New("error: grpc connection to fav failed")
+	}
+
+	result, err := conn.Fav().CreateFavProject(pctx, &favPb.CreateFavProjectReq{
+		ProjectId: projectId.Hex(),
+	})
+	if err != nil {
+		log.Printf("Error: Create Fav For Project Error %s", err.Error())
+		return errors.New(result.Msg)
+	}
+
+	return nil
+}
+
+// make grpc conn to create fav document # project -> fav
+func (r *projectRepository) InsertEmptyComment(pctx context.Context, projectId primitive.ObjectID, commentGrpcUrl string) error {
+	jwtauth.SetApiKeyInContext(&pctx)
+	conn, err := grpcconn.NewGrpcClient(commentGrpcUrl)
+	if err != nil {
+		log.Printf("Error: Grpc Conn Error %s", err.Error())
+		return errors.New("error: grpc connection to comment failed")
+	}
+
+	_, err = conn.Comment().CreateCommentProject(pctx, &commentPb.CreateCommentProjectReq{
+		ProjectId: projectId.Hex(),
+	})
+
+	if err != nil {
+		log.Printf("Error: Create Comment For Project Error %s", err.Error())
+		return err
+	}
+	return nil
+}
+
+// make grpc conn to get info of user # project -> user
+func (r *projectRepository) FindOneUserWithId(pctx context.Context, grpcUrl string, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error) {
+	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
+	defer cancel()
+
+	jwtauth.SetApiKeyInContext(&ctx)
+	conn, err := grpcconn.NewGrpcClient(grpcUrl)
+	if err != nil {
+		log.Printf("Error: Grpc Conn Error %s", err.Error())
+		return nil, errors.New("error: grpc connection failed")
+	}
+	result, err := conn.Users().GetUserInfoById(ctx, req)
+	if err != nil {
+		log.Printf("Error: Find One User For Project Error %s", err.Error())
+		return nil, errors.New("error: find out user for project not found")
+	}
+
+	return result, nil
+}
+
+// make grpc conn to delete fav # project -> fav
+// if some of the process cancel we need to back track and delete all of the thing
+func (r *projectRepository) DeleteFavProject(pctx context.Context, projectId primitive.ObjectID, grpcUrl string) (*favPb.DeleteFavProjectRes, error) {
+	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
+	defer cancel()
+
+	jwtauth.SetApiKeyInContext(&ctx)
+	conn, err := grpcconn.NewGrpcClient(grpcUrl)
+	if err != nil {
+		log.Printf("Error: Grpc Conn Error %s", err.Error())
+		return nil, errors.New("error: grpc connection failed")
+	}
+	result, err := conn.Fav().DeleteFavProject(ctx, &favPb.DeleteFavProjectReq{
+		ProjectId: projectId.Hex(),
+	})
+
+	if err != nil {
+		log.Printf("Error: Delete Fav Project Grpc Failed %s", err.Error())
+		return nil, errors.New("error: delete fav project grpc failed")
+	}
+
+	return result, nil
 }

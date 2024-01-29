@@ -88,6 +88,7 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	case "project":
 		s.projectService()
 	case "favorite":
+		go s.commentService()
 		s.favoriteService()
 	}
 

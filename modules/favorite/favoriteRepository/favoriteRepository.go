@@ -19,6 +19,7 @@ type (
 		PullUserToFav(pctx context.Context, projectId primitive.ObjectID, userId string) (string, error)
 		CountFav(pctx context.Context, projectId primitive.ObjectID, userId string) (int64, int64, error)
 		InsertOneFav(pctx context.Context, req *favorite.FavModel) error
+		DeleteFav(pctx context.Context, projectId primitive.ObjectID) error
 	}
 
 	favoriteRepository struct {
@@ -55,7 +56,7 @@ func (r *favoriteRepository) CountFav(pctx context.Context, projectId primitive.
 					}},
 				},
 				bson.D{
-					{"$count", "countProject"},
+					{"$count", "countUser"},
 				},
 			},
 			"countProject": bson.A{
@@ -76,7 +77,7 @@ func (r *favoriteRepository) CountFav(pctx context.Context, projectId primitive.
 		{"$project", bson.M{
 			"result": bson.M{
 				"$mergeObjects": bson.A{
-					bson.M{"countUser": bson.M{"$ifNull": bson.A{bson.M{"$arrayElemAt": bson.A{"$countUser.countProject", 0}}, 0}}},
+					bson.M{"countUser": bson.M{"$ifNull": bson.A{bson.M{"$arrayElemAt": bson.A{"$countUser.countUser", 0}}, 0}}},
 					bson.M{"countProject": bson.M{"$ifNull": bson.A{bson.M{"$arrayElemAt": bson.A{"$countProject.countProject", 0}}, 0}}},
 				},
 			},
@@ -110,6 +111,7 @@ func (r *favoriteRepository) CountFav(pctx context.Context, projectId primitive.
 
 	return result.CountProject, result.CountUser, nil
 }
+
 func (r *favoriteRepository) PushUserToFav(pctx context.Context, projectId primitive.ObjectID, userId string) (string, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
@@ -145,6 +147,27 @@ func (r *favoriteRepository) InsertOneFav(pctx context.Context, req *favorite.Fa
 	}
 
 	return nil
+}
+
+func (r *favoriteRepository) DeleteFav(pctx context.Context, projectId primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.favoriteDbConn(ctx)
+	col := db.Collection("favs")
+
+	result, err := col.DeleteOne(ctx, bson.M{"_id": projectId})
+	if err != nil {
+		log.Printf("Error: Delete One Fav Error %s", err.Error())
+		return errors.New("error: delete one fav failed")
+	}
+
+	if result.DeletedCount == 0 {
+		return errors.New("error: no dument found to delete")
+	}
+
+	return nil
+
 }
 
 func (r *favoriteRepository) PullUserToFav(pctx context.Context, projectId primitive.ObjectID, userId string) (string, error) {

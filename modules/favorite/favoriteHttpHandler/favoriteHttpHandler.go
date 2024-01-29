@@ -1,7 +1,7 @@
 package favoritehttphandler
 
 import (
-	favoriteusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteUsecase"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/response"
 	"context"
 	"net/http"
@@ -15,13 +15,13 @@ type (
 	}
 
 	favoriteHttpHandler struct {
-		favoriteUsecase favoriteusecase.FavoriteUsecaseService
+		pActor modules.ProjectSvcInteractor
 	}
 )
 
-func NewFavoriteHttpHandler(favoriteUsecase favoriteusecase.FavoriteUsecaseService) FavoriteHttpHandlerService {
+func NewFavoriteHttpHandler(pActor modules.ProjectSvcInteractor) FavoriteHttpHandlerService {
 	return &favoriteHttpHandler{
-		favoriteUsecase: favoriteUsecase,
+		pActor: pActor,
 	}
 }
 
@@ -36,7 +36,7 @@ func (h *favoriteHttpHandler) FavPullOrPushHttp(c echo.Context) error {
 		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
 	}
 
-	opera, err := h.favoriteUsecase.FavPullOrPushUsecase(ctx, projectId, userId)
+	opera, err := h.pActor.FavoriteUsecase.FavPullOrPushUsecase(ctx, projectId, userId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}

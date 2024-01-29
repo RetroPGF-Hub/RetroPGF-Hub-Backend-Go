@@ -2,8 +2,15 @@ package server
 
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
+	commentrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentRepository"
+	commentusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentUsecase"
+	favoriterepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteRepository"
+	favoriteusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteUsecase"
 	middlewarehttphandler "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareHttpHandler"
 	middlewareusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareUsecase"
+	projectrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectRepository"
+	projectusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectUsecase"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
 	"context"
 	"log"
@@ -86,10 +93,25 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	case "users":
 		s.usersService()
 	case "project":
-		s.projectService()
-	case "favorite":
-		go s.commentService()
-		s.favoriteService()
+
+		projectRepo := projectrepository.NewProjectRepository(s.db)
+		projectUsecase := projectusecase.NewProjectUsecase(projectRepo)
+
+		commentRepo := commentrepository.NewCommentRepository(s.db)
+		commentUsecase := commentusecase.NewCommentUsecase(commentRepo)
+
+		favoriteRepo := favoriterepository.NewFavoriteRepository(s.db)
+		favoriteUsecase := favoriteusecase.NewFavoriteUsecase(favoriteRepo)
+
+		projectActor := modules.NewProjectSvc(projectUsecase, commentUsecase, favoriteUsecase)
+
+		s.projectService(projectActor)
+
+		// comment service
+		s.commentService(projectActor)
+
+		// fav service
+		s.favoriteService(projectActor)
 	}
 
 	s.app.Use(middleware.Logger())

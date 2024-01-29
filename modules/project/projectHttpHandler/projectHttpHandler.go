@@ -2,8 +2,8 @@ package projecthttphandler
 
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project"
-	projectusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectUsecase"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/request"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/response"
 	"context"
@@ -21,15 +21,15 @@ type (
 	}
 
 	projectHttpHandler struct {
-		projectUsecase projectusecase.ProjectUsecaseService
-		cfg            *config.Config
+		pActor modules.ProjectSvcInteractor
+		cfg    *config.Config
 	}
 )
 
-func NewProjectHttpHandler(projectUsecase projectusecase.ProjectUsecaseService, cfg *config.Config) ProjectHttpHandlerService {
+func NewProjectHttpHandler(pActor modules.ProjectSvcInteractor, cfg *config.Config) ProjectHttpHandlerService {
 	return &projectHttpHandler{
-		projectUsecase: projectUsecase,
-		cfg:            cfg,
+		pActor: pActor,
+		cfg:    cfg,
 	}
 }
 
@@ -51,7 +51,7 @@ func (h *projectHttpHandler) CreateNewProjectHttp(c echo.Context) error {
 
 	req.CreatedBy = userId
 
-	res, err := h.projectUsecase.CreateNewProjectUsecase(ctx, req, &h.cfg.Grpc)
+	res, err := h.pActor.ProjectUsecase.CreateNewProjectUsecase(ctx, req, &h.cfg.Grpc)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
@@ -76,7 +76,7 @@ func (h *projectHttpHandler) FindOneProjectHttp(c echo.Context) error {
 		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
 	}
 
-	res, err := h.projectUsecase.FindOneProjectUsecase(ctx, &h.cfg.Grpc, projectId, userId)
+	res, err := h.pActor.ProjectUsecase.FindOneProjectUsecase(ctx, &h.cfg.Grpc, projectId, userId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
@@ -97,7 +97,7 @@ func (h *projectHttpHandler) DeleteOneProjectHttp(c echo.Context) error {
 		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
 	}
 
-	err := h.projectUsecase.DeleteOneProjectUsecase(ctx, projectId, userId)
+	err := h.pActor.ProjectUsecase.DeleteOneProjectUsecase(ctx, projectId, userId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
@@ -128,7 +128,7 @@ func (h *projectHttpHandler) UpdateOneProjectHttp(c echo.Context) error {
 		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
 	}
 
-	res, err := h.projectUsecase.UpdateOneProjectUsecase(ctx, &h.cfg.Grpc, userId, projectId, req)
+	res, err := h.pActor.ProjectUsecase.UpdateOneProjectUsecase(ctx, &h.cfg.Grpc, userId, projectId, req)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}

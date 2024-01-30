@@ -20,6 +20,7 @@ type (
 		PullComment(pctx context.Context, projectId primitive.ObjectID, commentId primitive.ObjectID) error
 		CountComment(pctx context.Context, projectId primitive.ObjectID) (int64, error)
 		UpdateComment(pctx context.Context, projectId primitive.ObjectID, req *comment.CommentA) (*comment.CommentModel, error)
+		DeleteCommentDoc(pctx context.Context, projectId primitive.ObjectID) error
 	}
 
 	commentRepository struct {
@@ -123,7 +124,6 @@ func (r *commentRepository) UpdateComment(pctx context.Context, projectId primit
 	return updatedComment, nil
 }
 
-// not sure if this query work fine or not
 func (r *commentRepository) CountComment(pctx context.Context, projectId primitive.ObjectID) (int64, error) {
 
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
@@ -138,4 +138,24 @@ func (r *commentRepository) CountComment(pctx context.Context, projectId primiti
 		return count, errors.New("error: checking user unique failed")
 	}
 	return count, nil
+}
+
+func (r *commentRepository) DeleteCommentDoc(pctx context.Context, projectId primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.commentDbConn(ctx)
+	col := db.Collection("comments")
+
+	result, err := col.DeleteOne(ctx, bson.M{"_id": projectId})
+	if err != nil {
+		log.Printf("Error: Delete Comment Doc Error %s", err.Error())
+		return errors.New("error: delete comment doc failed")
+	}
+
+	if result.DeletedCount == 0 {
+		return errors.New("error: no dument found to delete")
+	}
+
+	return nil
 }

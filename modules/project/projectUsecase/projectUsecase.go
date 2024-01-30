@@ -2,8 +2,10 @@ package projectusecase
 
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project"
-	projectrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectRepository"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
 	"context"
@@ -22,18 +24,18 @@ type (
 	}
 
 	projectUsecase struct {
-		projectRepo projectrepository.ProjectRepositoryService
+		pActor modules.ProjectSvcInteractor
 	}
 )
 
-func NewProjectUsecase(projectRepo projectrepository.ProjectRepositoryService) ProjectUsecaseService {
+func NewProjectUsecase(pActor modules.ProjectSvcInteractor) ProjectUsecaseService {
 	return &projectUsecase{
-		projectRepo: projectRepo,
+		pActor: pActor,
 	}
 }
 
 func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, req *project.InsertProjectReq, cfg *config.Grpc) (*project.ProjectRes, error) {
-	projectId, err := u.projectRepo.InsertOneProject(pctx, &project.ProjectModel{
+	projectId, err := u.pActor.ProjectRepo.InsertOneProject(pctx, &project.ProjectModel{
 		Id:             primitive.NewObjectID(),
 		Name:           req.Name,
 		LogoUrl:        req.LogoUrl,
@@ -54,28 +56,40 @@ func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, req *proj
 		return nil, err
 	}
 
+	// done
 	// create empty docs to fav using grpc
 	// in case someething wrong with this grpc conn the project going to ge remove
-	if err := u.projectRepo.InsertEmptyFav(pctx, projectId, cfg.FavUrl); err != nil {
-		if err := u.projectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
+	if err := u.pActor.FavoriteRepo.InsertOneFav(pctx, &favorite.FavModel{
+		User:      utils.ConvertToObjectId(req.CreatedBy),
+		ProjectId: []string{},
+		CreateAt:  utils.LocalTime(),
+		UpdatedAt: utils.LocalTime(),
+	}); err != nil {
+		if err := u.pActor.ProjectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
 			return nil, err
 		}
 		return nil, err
 	}
 
+	// done
 	// create empty docs to comment using grpc
 	// in case someething wrong with this grpc conn the project going to ge remove
-	if err := u.projectRepo.InsertEmptyComment(pctx, projectId, cfg.CommentUrl); err != nil {
-		if err := u.projectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
+	if err := u.pActor.CommentRepo.InsertEmptyComment(pctx, &comment.CommentModel{
+		ProjectId: projectId,
+		Comments:  []comment.CommentA{},
+		CreateAt:  utils.LocalTime(),
+		UpdatedAt: utils.LocalTime(),
+	}); err != nil {
+		if err := u.pActor.ProjectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
 			return nil, err
 		}
-		if _, err := u.projectRepo.DeleteFavProject(pctx, projectId, cfg.FavUrl); err != nil {
+		if err := u.pActor.FavoriteRepo.DeleteFav(pctx, projectId); err != nil {
 			return nil, err
 		}
 		return nil, err
 	}
 
-	projectData, err := u.projectRepo.FindOneProject(pctx, projectId)
+	projectData, err := u.pActor.ProjectRepo.FindOneProject(pctx, projectId)
 	if err != nil {
 		return nil, err
 	}
@@ -101,12 +115,12 @@ func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, req *proj
 
 func (u *projectUsecase) FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.ProjectResWithUser, error) {
 
-	projectD, err := u.projectRepo.FindOneProject(pctx, utils.ConvertToObjectId(projectId))
+	projectD, err := u.pActor.ProjectRepo.FindOneProject(pctx, utils.ConvertToObjectId(projectId))
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := u.projectRepo.FindOneUserWithId(pctx, grpcCfg.UserUrl, &usersPb.GetUserInfoReq{
+	user, err := u.pActor.ProjectRepo.FindOneUserWithId(pctx, grpcCfg.UserUrl, &usersPb.GetUserInfoReq{
 		UserId: userId,
 	})
 	if err != nil {
@@ -117,7 +131,7 @@ func (u *projectUsecase) FindOneProjectUsecase(pctx context.Context, grpcCfg *co
 }
 
 func (u *projectUsecase) UpdateOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string, req *project.InsertProjectReq) (*project.ProjectResWithUser, error) {
-	projectD, err := u.projectRepo.UpdateProject(pctx, &project.ProjectModel{
+	projectD, err := u.pActor.ProjectRepo.UpdateProject(pctx, &project.ProjectModel{
 		Id:             utils.ConvertToObjectId(projectId),
 		Name:           req.Name,
 		LogoUrl:        req.LogoUrl,
@@ -134,7 +148,7 @@ func (u *projectUsecase) UpdateOneProjectUsecase(pctx context.Context, grpcCfg *
 		return nil, err
 	}
 
-	user, err := u.projectRepo.FindOneUserWithId(pctx, grpcCfg.UserUrl, &usersPb.GetUserInfoReq{
+	user, err := u.pActor.ProjectRepo.FindOneUserWithId(pctx, grpcCfg.UserUrl, &usersPb.GetUserInfoReq{
 		UserId: userId,
 	})
 	if err != nil {
@@ -145,9 +159,19 @@ func (u *projectUsecase) UpdateOneProjectUsecase(pctx context.Context, grpcCfg *
 }
 
 func (u *projectUsecase) DeleteOneProjectUsecase(pctx context.Context, projectId, userId string) error {
-	if err := u.projectRepo.DeleteProject(pctx, utils.ConvertToObjectId(projectId), userId); err != nil {
+	projectIdPri := utils.ConvertToObjectId(projectId)
+	if err := u.pActor.ProjectRepo.DeleteProject(pctx, projectIdPri, userId); err != nil {
 		return err
 	}
+
+	if err := u.pActor.FavoriteRepo.DeleteFav(pctx, projectIdPri); err != nil {
+		return err
+	}
+
+	if err := u.pActor.CommentRepo.DeleteCommentDoc(pctx, projectIdPri); err != nil {
+		return err
+	}
+
 	return nil
 }
 

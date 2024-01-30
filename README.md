@@ -59,10 +59,9 @@ Table comment {
 }
 
 Table favourite {
-  project_id String
+  project_id String[]
   // users is a array of user
   users String[]
-  user_id String
   created_at      timestamp
 }
 

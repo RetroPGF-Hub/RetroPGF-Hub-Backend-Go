@@ -30,4 +30,5 @@ func (s *server) usersService() {
 	users.POST("/register", usersHttpHandler.RegisterUser)
 	users.POST("/login", usersHttpHandler.LoginUser)
 	users.GET("/logout", usersHttpHandler.LogOutUser)
+
 }

@@ -10,10 +10,11 @@ import (
 
 type (
 	Config struct {
-		App  App
-		Db   Db
-		Jwt  Jwt
-		Grpc Grpc
+		App   App
+		Db    Db
+		Jwt   Jwt
+		Grpc  Grpc
+		Redis Redis
 	}
 
 	App struct {
@@ -24,6 +25,12 @@ type (
 
 	Db struct {
 		Url string
+	}
+
+	Redis struct {
+		Addr     string
+		Password string
+		DB       int
 	}
 
 	Jwt struct {
@@ -50,6 +57,10 @@ func LoadConfig(path string) Config {
 		log.Fatalf("Error loading .env file : %s", err.Error())
 	}
 
+	// redisDb, err := strconv.Atoi(os.Getenv("REDIS_DB"))
+	// if err != nil {
+	// 	log.Fatalf("Error can't convert REDIS_DB to int")
+	// }
 	return Config{
 		App: App{
 			Name:  os.Getenv("APP_NAME"),
@@ -87,6 +98,12 @@ func LoadConfig(path string) Config {
 			FavUrl:     os.Getenv("GRPC_FAV_URL"),
 			CommentUrl: os.Getenv("GRPC_COM_URL"),
 		},
+
+		// Redis: Redis{
+		// 	Addr:     os.Getenv("REDIS_ADDR"),
+		// 	DB:       redisDb,
+		// 	Password: os.Getenv("REDIS_PASSWORD"),
+		// },
 	}
 
 }

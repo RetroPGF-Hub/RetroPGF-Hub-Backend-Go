@@ -1,8 +1,6 @@
 package projectrepository
 
 import (
-	commentPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentPb"
-	favPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favPb"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project"
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
 	grpcconn "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/grpcConn"
@@ -26,9 +24,8 @@ type (
 		FindOneUserWithId(pctx context.Context, grpcUrl string, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error)
 		UpdateProject(pctx context.Context, req *project.ProjectModel, userId string) (*project.ProjectModel, error)
 		DeleteProject(pctx context.Context, projectId primitive.ObjectID, userId string) error
-		InsertEmptyFav(pctx context.Context, projectId primitive.ObjectID, favGrpcUrl string) error
-		InsertEmptyComment(pctx context.Context, projectId primitive.ObjectID, commentGrpcUrl string) error
-		DeleteFavProject(pctx context.Context, projectId primitive.ObjectID, grpcUrl string) (*favPb.DeleteFavProjectRes, error)
+		UpdateFavCount(pctx context.Context, projectId primitive.ObjectID, counter int64) error
+		UpdateCommentCount(pctx context.Context, projectId primitive.ObjectID, counter int64) error
 	}
 
 	projectRepository struct {
@@ -116,6 +113,78 @@ func (r *projectRepository) UpdateProject(pctx context.Context, req *project.Pro
 	return updatedProject, nil
 }
 
+func (r *projectRepository) UpdateFavCount(pctx context.Context, projectId primitive.ObjectID, counter int64) error {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.projectDbConn(ctx)
+	col := db.Collection("projects")
+
+	filter := bson.M{"_id": projectId}
+
+	update := bson.M{
+		"$inc": bson.M{
+			"fav_count": counter,
+		},
+		"$set": bson.M{
+			"updated_at": time.Now(),
+		},
+	}
+
+	options := options.UpdateOptions(*options.Update().SetUpsert(false))
+
+	result, err := col.UpdateOne(ctx, filter, update, &options)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errors.New("warning: no document found")
+		}
+		log.Printf("Error: Update Fav Count Project Error %s", err.Error())
+		return errors.New("error: update fav count failed")
+	}
+
+	if result.MatchedCount == 0 {
+		return errors.New("document not found")
+	}
+
+	return nil
+}
+
+func (r *projectRepository) UpdateCommentCount(pctx context.Context, projectId primitive.ObjectID, counter int64) error {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.projectDbConn(ctx)
+	col := db.Collection("projects")
+
+	filter := bson.M{"_id": projectId}
+
+	update := bson.M{
+		"$inc": bson.M{
+			"comment_count": counter,
+		},
+		"$set": bson.M{
+			"updated_at": time.Now(),
+		},
+	}
+
+	options := options.UpdateOptions(*options.Update().SetUpsert(false))
+
+	result, err := col.UpdateOne(ctx, filter, update, &options)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return errors.New("warning: no document found")
+		}
+		log.Printf("Error: Update Comment Count Project Error %s", err.Error())
+		return errors.New("error: update comment count failed")
+	}
+
+	if result.MatchedCount == 0 {
+		return errors.New("document not found")
+	}
+
+	return nil
+}
+
 func (r *projectRepository) DeleteProject(pctx context.Context, projectId primitive.ObjectID, userId string) error {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
@@ -137,46 +206,6 @@ func (r *projectRepository) DeleteProject(pctx context.Context, projectId primit
 
 }
 
-// make grpc conn to create fav document # project -> fav
-func (r *projectRepository) InsertEmptyFav(pctx context.Context, projectId primitive.ObjectID, favGrpcUrl string) error {
-	jwtauth.SetApiKeyInContext(&pctx)
-	conn, err := grpcconn.NewGrpcClient(favGrpcUrl)
-	if err != nil {
-		log.Printf("Error: Grpc Conn Error %s", err.Error())
-		return errors.New("error: grpc connection to fav failed")
-	}
-
-	result, err := conn.Fav().CreateFavProject(pctx, &favPb.CreateFavProjectReq{
-		ProjectId: projectId.Hex(),
-	})
-	if err != nil {
-		log.Printf("Error: Create Fav For Project Error %s", err.Error())
-		return errors.New(result.Msg)
-	}
-
-	return nil
-}
-
-// make grpc conn to create fav document # project -> fav
-func (r *projectRepository) InsertEmptyComment(pctx context.Context, projectId primitive.ObjectID, commentGrpcUrl string) error {
-	jwtauth.SetApiKeyInContext(&pctx)
-	conn, err := grpcconn.NewGrpcClient(commentGrpcUrl)
-	if err != nil {
-		log.Printf("Error: Grpc Conn Error %s", err.Error())
-		return errors.New("error: grpc connection to comment failed")
-	}
-
-	_, err = conn.Comment().CreateCommentProject(pctx, &commentPb.CreateCommentProjectReq{
-		ProjectId: projectId.Hex(),
-	})
-
-	if err != nil {
-		log.Printf("Error: Create Comment For Project Error %s", err.Error())
-		return err
-	}
-	return nil
-}
-
 // make grpc conn to get info of user # project -> user
 func (r *projectRepository) FindOneUserWithId(pctx context.Context, grpcUrl string, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error) {
 	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
@@ -192,30 +221,6 @@ func (r *projectRepository) FindOneUserWithId(pctx context.Context, grpcUrl stri
 	if err != nil {
 		log.Printf("Error: Find One User For Project Error %s", err.Error())
 		return nil, errors.New("error: find out user for project not found")
-	}
-
-	return result, nil
-}
-
-// make grpc conn to delete fav # project -> fav
-// if some of the process cancel we need to back track and delete all of the thing
-func (r *projectRepository) DeleteFavProject(pctx context.Context, projectId primitive.ObjectID, grpcUrl string) (*favPb.DeleteFavProjectRes, error) {
-	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
-	defer cancel()
-
-	jwtauth.SetApiKeyInContext(&ctx)
-	conn, err := grpcconn.NewGrpcClient(grpcUrl)
-	if err != nil {
-		log.Printf("Error: Grpc Conn Error %s", err.Error())
-		return nil, errors.New("error: grpc connection failed")
-	}
-	result, err := conn.Fav().DeleteFavProject(ctx, &favPb.DeleteFavProjectReq{
-		ProjectId: projectId.Hex(),
-	})
-
-	if err != nil {
-		log.Printf("Error: Delete Fav Project Grpc Failed %s", err.Error())
-		return nil, errors.New("error: delete fav project grpc failed")
 	}
 
 	return result, nil

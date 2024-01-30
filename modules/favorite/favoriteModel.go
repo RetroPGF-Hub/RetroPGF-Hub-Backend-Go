@@ -8,8 +8,8 @@ import (
 
 type (
 	FavModel struct {
-		ProjectId primitive.ObjectID `bson:"_id,omitempty"`
-		Users     []string           `bson:"users"`
+		User      primitive.ObjectID `bson:"_id,omitempty"`
+		ProjectId []string           `bson:"projects"`
 		CreateAt  time.Time          `bson:"created_at"`
 		UpdatedAt time.Time          `bson:"updated_at"`
 	}

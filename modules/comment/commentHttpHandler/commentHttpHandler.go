@@ -1,8 +1,8 @@
 package commenthttphandler
 
 import (
-	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment"
+	commentusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentUsecase"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/request"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/response"
 	"context"
@@ -18,13 +18,13 @@ type (
 	}
 
 	commentHttpHandler struct {
-		pActor modules.ProjectSvcInteractor
+		commentUsecase commentusecase.CommentUsecaseService
 	}
 )
 
-func NewCommentHttpHandler(pActor modules.ProjectSvcInteractor) CommentHttpHandlerService {
+func NewCommentHttpHandler(commentUsecase commentusecase.CommentUsecaseService) CommentHttpHandlerService {
 	return &commentHttpHandler{
-		pActor: pActor,
+		commentUsecase: commentUsecase,
 	}
 }
 
@@ -50,7 +50,7 @@ func (h *commentHttpHandler) PushComment(c echo.Context) error {
 
 	req.CreatedBy = userId
 
-	err := h.pActor.CommentUsecase.PushCommentUsecase(ctx, req, projectId)
+	err := h.commentUsecase.PushCommentUsecase(ctx, req, projectId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
@@ -89,7 +89,7 @@ func (h *commentHttpHandler) UpdateComment(c echo.Context) error {
 
 	req.CreatedBy = userId
 
-	updatedComment, err := h.pActor.CommentUsecase.UpdateCommentUsecase(ctx, req, projectId, commentId)
+	updatedComment, err := h.commentUsecase.UpdateCommentUsecase(ctx, req, projectId, commentId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}

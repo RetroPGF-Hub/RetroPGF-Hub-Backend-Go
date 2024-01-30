@@ -1,25 +1,14 @@
 package server
 
 import (
-	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
 	commenthttphandler "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentHttpHandler"
+	commentusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentUsecase"
 )
 
-func (s *server) commentService(pActor *modules.ProjectSvcInteractor) {
+func (s *server) commentService(commentUsecase *commentusecase.CommentUsecaseService) {
 	// commentRepo := commentrepository.NewCommentRepository(s.db)
 	// commentUsecase := commentusecase.NewCommentUsecase(commentRepo)
-	commentHttpHandler := commenthttphandler.NewCommentHttpHandler(*pActor)
-
-	// commentGrpc := commenthttphandler.NewcommentGrpcHandler(*commentUsecase)
-	// // Grpc client
-	// go func() {
-	// 	grpcServer, lis := grpcconn.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.CommentUrl)
-
-	// 	commentPb.RegisterCommentGrpcServiceServer(grpcServer, commentGrpc)
-
-	// 	log.Printf("Comment grpc listening on %s", s.cfg.Grpc.CommentUrl)
-	// 	grpcServer.Serve(lis)
-	// }()
+	commentHttpHandler := commenthttphandler.NewCommentHttpHandler(*commentUsecase)
 
 	comments := s.app.Group("/comment_v1")
 	comments.POST("/push-comment/:projectId", commentHttpHandler.PushComment, s.middleware.JwtAuthorization)

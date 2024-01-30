@@ -1,21 +1,21 @@
 package modules
 
 import (
-	commentusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentUsecase"
-	favoriteusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteUsecase"
-	projectusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectUsecase"
+	commentrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentRepository"
+	favoriterepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteRepository"
+	projectrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectRepository"
 )
 
 type ProjectSvcInteractor struct {
-	ProjectUsecase  projectusecase.ProjectUsecaseService
-	CommentUsecase  commentusecase.CommentUsecaseService
-	FavoriteUsecase favoriteusecase.FavoriteUsecaseService
+	ProjectRepo  projectrepository.ProjectRepositoryService
+	CommentRepo  commentrepository.CommentRepositoryService
+	FavoriteRepo favoriterepository.FavoriteRepositoryService
 }
 
-func NewProjectSvc(projectUsecase projectusecase.ProjectUsecaseService, commentUsecase commentusecase.CommentUsecaseService, favoriteUsecase favoriteusecase.FavoriteUsecaseService) *ProjectSvcInteractor {
+func NewProjectSvc(projectRepo projectrepository.ProjectRepositoryService, commentRepo commentrepository.CommentRepositoryService, favoriteRepo favoriterepository.FavoriteRepositoryService) *ProjectSvcInteractor {
 	return &ProjectSvcInteractor{
-		ProjectUsecase:  projectUsecase,
-		CommentUsecase:  commentUsecase,
-		FavoriteUsecase: favoriteUsecase,
+		ProjectRepo:  projectRepo,
+		CommentRepo:  commentRepo,
+		FavoriteRepo: favoriteRepo,
 	}
 }

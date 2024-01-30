@@ -1,14 +1,14 @@
 package server
 
 import (
-	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
 	projecthttphandler "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectHttpHandler"
+	projectusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectUsecase"
 )
 
-func (s *server) projectService(pActor *modules.ProjectSvcInteractor) {
+func (s *server) projectService(projectUsecase *projectusecase.ProjectUsecaseService) {
 	// projectRepo := projectrepository.NewProjectRepository(s.db)
 	// projectUsecase := projectusecase.NewProjectUsecase(projectRepo)
-	projectHttpHandler := projecthttphandler.NewProjectHttpHandler(*pActor, s.cfg)
+	projectHttpHandler := projecthttphandler.NewProjectHttpHandler(*projectUsecase, s.cfg)
 
 	projects := s.app.Group("/project_v1")
 	projects.POST("/create", projectHttpHandler.CreateNewProjectHttp, s.middleware.JwtAuthorization)

@@ -1,9 +1,7 @@
 package favoriteusecase
 
 import (
-	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite"
-	favPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favPb"
-	favoriterepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteRepository"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
 	"context"
 	"errors"
@@ -12,75 +10,51 @@ import (
 type (
 	FavoriteUsecaseService interface {
 		FavPullOrPushUsecase(pctx context.Context, projectId, userId string) (string, error)
-		InsertEmptyDoc(pctx context.Context, req *favPb.CreateFavProjectReq) error
-		DeleteFavUsecase(pctx context.Context, req *favPb.DeleteFavProjectReq) error
 	}
 
 	favoriteUsecase struct {
-		favoriteRepo favoriterepository.FavoriteRepositoryService
+		pActor modules.ProjectSvcInteractor
 	}
 )
 
-func NewFavoriteUsecase(favoriteRepo favoriterepository.FavoriteRepositoryService) FavoriteUsecaseService {
+func NewFavoriteUsecase(pActor modules.ProjectSvcInteractor) FavoriteUsecaseService {
 	return &favoriteUsecase{
-		favoriteRepo: favoriteRepo,
+		pActor: pActor,
 	}
 }
 
 func (u *favoriteUsecase) FavPullOrPushUsecase(pctx context.Context, projectId, userId string) (string, error) {
+	userIdPri := utils.ConvertToObjectId(userId)
 	projectIdPri := utils.ConvertToObjectId(projectId)
-
-	countP, countU, err := u.favoriteRepo.CountFav(pctx, projectIdPri, userId)
+	countP, countU, err := u.pActor.FavoriteRepo.CountFav(pctx, userIdPri, projectId)
 	if err != nil {
 		return "", err
 	}
 
-	if countP == 0 {
-		// if err := u.favoriteRepo.InsertOneFav(pctx, &favorite.FavModel{
-		// 	ProjectId: projectIdPri,
-		// 	Users:     make([]string, 0),
-		// 	CreateAt:  utils.LocalTime(),
-		// 	UpdatedAt: utils.LocalTime(),
-		// }); err != nil {
-		// 	return "", err
-		// }
-		return "", errors.New("project you looking for is not exist")
+	if countU == 0 {
+		return "", errors.New("user you looking for is not exist")
 	}
 	var opera string
-
-	if countU == 0 {
-		push, err := u.favoriteRepo.PushUserToFav(pctx, projectIdPri, userId)
+	if countP == 0 {
+		push, err := u.pActor.FavoriteRepo.PushProjectToFav(pctx, projectId, userIdPri)
 		if err != nil {
 			return push, err
 		}
+
+		if err := u.pActor.ProjectRepo.UpdateFavCount(pctx, projectIdPri, 1); err != nil {
+			return push, err
+		}
+
 		opera = push
 	} else {
-		push, err := u.favoriteRepo.PullUserToFav(pctx, projectIdPri, userId)
+		pull, err := u.pActor.FavoriteRepo.PullProjectToFav(pctx, projectId, userIdPri)
 		if err != nil {
-			return push, err
+			return pull, err
 		}
-		opera = push
+		if err := u.pActor.ProjectRepo.UpdateFavCount(pctx, projectIdPri, -1); err != nil {
+			return pull, err
+		}
+		opera = pull
 	}
 	return opera, nil
-}
-
-// For grpc from project
-func (u *favoriteUsecase) InsertEmptyDoc(pctx context.Context, req *favPb.CreateFavProjectReq) error {
-	if err := u.favoriteRepo.InsertOneFav(pctx, &favorite.FavModel{
-		ProjectId: utils.ConvertToObjectId(req.ProjectId),
-		Users:     make([]string, 0),
-		CreateAt:  utils.LocalTime(),
-		UpdatedAt: utils.LocalTime(),
-	}); err != nil {
-		return err
-	}
-	return nil
-}
-
-// for grpc cancel project
-func (u *favoriteUsecase) DeleteFavUsecase(pctx context.Context, req *favPb.DeleteFavProjectReq) error {
-	if err := u.favoriteRepo.DeleteFav(pctx, utils.ConvertToObjectId(req.ProjectId)); err != nil {
-		return err
-	}
-	return nil
 }

@@ -15,11 +15,12 @@ import (
 
 type (
 	FavoriteRepositoryService interface {
-		PushUserToFav(pctx context.Context, projectId primitive.ObjectID, userId string) (string, error)
-		PullUserToFav(pctx context.Context, projectId primitive.ObjectID, userId string) (string, error)
-		CountFav(pctx context.Context, projectId primitive.ObjectID, userId string) (int64, int64, error)
+		PushProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error)
+		PullProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error)
+		CountFav(pctx context.Context, userId primitive.ObjectID, projectId string) (int64, int64, error)
 		InsertOneFav(pctx context.Context, req *favorite.FavModel) error
-		DeleteFav(pctx context.Context, projectId primitive.ObjectID) error
+		DeleteFav(pctx context.Context, userId primitive.ObjectID) error
+		GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID, projectId string) (*favorite.FavModel, error)
 	}
 
 	favoriteRepository struct {
@@ -36,7 +37,7 @@ func NewFavoriteRepository(db *mongo.Client) FavoriteRepositoryService {
 		db: db,
 	}
 }
-func (r *favoriteRepository) CountFav(pctx context.Context, projectId primitive.ObjectID, userId string) (int64, int64, error) {
+func (r *favoriteRepository) CountFav(pctx context.Context, userId primitive.ObjectID, projectId string) (int64, int64, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 
@@ -46,27 +47,27 @@ func (r *favoriteRepository) CountFav(pctx context.Context, projectId primitive.
 	// $facet stage
 	facetStage := bson.D{
 		{"$facet", bson.M{
-			"countUser": bson.A{
+			"countProject": bson.A{
 				bson.D{
 					{"$match", bson.M{
 						"$and": bson.A{
-							bson.M{"_id": projectId},
-							bson.M{"users": bson.M{"$elemMatch": bson.M{"$eq": userId}}},
+							bson.M{"_id": userId},
+							bson.M{"projects": bson.M{"$elemMatch": bson.M{"$eq": projectId}}},
 						},
 					}},
 				},
 				bson.D{
-					{"$count", "countUser"},
+					{"$count", "countProject"},
 				},
 			},
-			"countProject": bson.A{
+			"countUser": bson.A{
 				bson.D{
 					{"$match", bson.M{
-						"_id": projectId,
+						"_id": userId,
 					}},
 				},
 				bson.D{
-					{"$count", "countProject"},
+					{"$count", "countUser"},
 				},
 			},
 		}},
@@ -77,8 +78,8 @@ func (r *favoriteRepository) CountFav(pctx context.Context, projectId primitive.
 		{"$project", bson.M{
 			"result": bson.M{
 				"$mergeObjects": bson.A{
-					bson.M{"countUser": bson.M{"$ifNull": bson.A{bson.M{"$arrayElemAt": bson.A{"$countUser.countUser", 0}}, 0}}},
 					bson.M{"countProject": bson.M{"$ifNull": bson.A{bson.M{"$arrayElemAt": bson.A{"$countProject.countProject", 0}}, 0}}},
+					bson.M{"countUser": bson.M{"$ifNull": bson.A{bson.M{"$arrayElemAt": bson.A{"$countUser.countUser", 0}}, 0}}},
 				},
 			},
 		}},
@@ -112,16 +113,16 @@ func (r *favoriteRepository) CountFav(pctx context.Context, projectId primitive.
 	return result.CountProject, result.CountUser, nil
 }
 
-func (r *favoriteRepository) PushUserToFav(pctx context.Context, projectId primitive.ObjectID, userId string) (string, error) {
+func (r *favoriteRepository) PushProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 	db := r.favoriteDbConn(ctx)
 	col := db.Collection("favs")
 
-	filter := bson.M{"_id": projectId}
-	update := bson.M{"$push": bson.M{"users": userId}, "$set": bson.M{"updated_at": utils.LocalTime()}}
+	filter := bson.M{"_id": userId}
+	update := bson.M{"$push": bson.M{"projects": projectId}, "$set": bson.M{"updated_at": utils.LocalTime()}}
 
-	result, err := col.UpdateOne(context.Background(), filter, update)
+	result, err := col.UpdateOne(ctx, filter, update)
 	if err != nil {
 		log.Printf("Error: Push User To Fav Failed: %s", err.Error())
 		return "push", errors.New("error: push user to fav fail")
@@ -134,50 +135,14 @@ func (r *favoriteRepository) PushUserToFav(pctx context.Context, projectId primi
 	return "push", nil
 }
 
-func (r *favoriteRepository) InsertOneFav(pctx context.Context, req *favorite.FavModel) error {
+func (r *favoriteRepository) PullProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 	db := r.favoriteDbConn(ctx)
 	col := db.Collection("favs")
 
-	_, err := col.InsertOne(context.Background(), req)
-	if err != nil {
-		log.Printf("Error: Insert One Fav Failed: %s", err.Error())
-		return errors.New("error: insert one fav fail")
-	}
-
-	return nil
-}
-
-func (r *favoriteRepository) DeleteFav(pctx context.Context, projectId primitive.ObjectID) error {
-	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
-	defer cancel()
-
-	db := r.favoriteDbConn(ctx)
-	col := db.Collection("favs")
-
-	result, err := col.DeleteOne(ctx, bson.M{"_id": projectId})
-	if err != nil {
-		log.Printf("Error: Delete One Fav Error %s", err.Error())
-		return errors.New("error: delete one fav failed")
-	}
-
-	if result.DeletedCount == 0 {
-		return errors.New("error: no dument found to delete")
-	}
-
-	return nil
-
-}
-
-func (r *favoriteRepository) PullUserToFav(pctx context.Context, projectId primitive.ObjectID, userId string) (string, error) {
-	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
-	defer cancel()
-	db := r.favoriteDbConn(ctx)
-	col := db.Collection("favs")
-
-	update := bson.M{"$pull": bson.M{"users": userId}}
-	result, err := col.UpdateOne(context.Background(), bson.M{"_id": projectId}, update)
+	update := bson.M{"$pull": bson.M{"projects": projectId}}
+	result, err := col.UpdateOne(ctx, bson.M{"_id": userId}, update)
 	if err != nil {
 		log.Printf("Error: Pull User To Fav Failed: %s", err.Error())
 		return "pull", errors.New("error: pull user to fav fail")
@@ -190,4 +155,54 @@ func (r *favoriteRepository) PullUserToFav(pctx context.Context, projectId primi
 	return "pull", nil
 }
 
-// func ()
+func (r *favoriteRepository) InsertOneFav(pctx context.Context, req *favorite.FavModel) error {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+	db := r.favoriteDbConn(ctx)
+	col := db.Collection("favs")
+
+	_, err := col.InsertOne(ctx, req)
+	if err != nil {
+		log.Printf("Error: Insert One Fav Failed: %s", err.Error())
+		return errors.New("error: insert one fav fail")
+	}
+
+	return nil
+}
+
+func (r *favoriteRepository) DeleteFav(pctx context.Context, userId primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.favoriteDbConn(ctx)
+	col := db.Collection("favs")
+
+	result, err := col.DeleteOne(ctx, bson.M{"_id": userId})
+	if err != nil {
+		log.Printf("Error: Delete One Fav Error %s", err.Error())
+		return errors.New("error: delete one fav failed")
+	}
+
+	if result.DeletedCount == 0 {
+		return errors.New("error: no dument found to delete")
+	}
+
+	return nil
+}
+
+func (r *favoriteRepository) GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID, projectId string) (*favorite.FavModel, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+	db := r.favoriteDbConn(ctx)
+	col := db.Collection("favs")
+	filter := bson.M{"_id": userId}
+
+	result := new(favorite.FavModel)
+
+	if err := col.FindOne(ctx, filter).Decode(result); err != nil {
+		return nil, errors.New("error: get all fav id not found")
+	}
+
+	return result, nil
+
+}

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+// Package name
+option go_package = "RetroPGF-Hub/RetroPGF-Hub-Backend-Go";
+
+
+// Structures
+message GetAllFavReq {
+    string userId = 1;
+}
+message GetAllFavRes {
+    string userId = 1;
+    repeated string projectId = 2;
+}
+
+// Method
+service FavGrpcService {
+    rpc GetAllFavByUserId(GetAllFavReq) returns (GetAllFavRes);
+}

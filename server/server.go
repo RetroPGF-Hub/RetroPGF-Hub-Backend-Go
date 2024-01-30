@@ -22,11 +22,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
 	server struct {
+		redis      *redis.Client
 		app        *echo.Echo
 		db         *mongo.Client
 		cfg        *config.Config
@@ -62,6 +64,8 @@ func (s *server) httpListening() {
 
 func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	s := &server{
+		// redis:      redisactor.RedisConn(&cfg.Redis),
+		redis:      nil,
 		db:         db,
 		cfg:        cfg,
 		app:        echo.New(),
@@ -95,23 +99,23 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	case "project":
 
 		projectRepo := projectrepository.NewProjectRepository(s.db)
-		projectUsecase := projectusecase.NewProjectUsecase(projectRepo)
-
 		commentRepo := commentrepository.NewCommentRepository(s.db)
-		commentUsecase := commentusecase.NewCommentUsecase(commentRepo)
-
 		favoriteRepo := favoriterepository.NewFavoriteRepository(s.db)
-		favoriteUsecase := favoriteusecase.NewFavoriteUsecase(favoriteRepo)
 
-		projectActor := modules.NewProjectSvc(projectUsecase, commentUsecase, favoriteUsecase)
+		projectActor := modules.NewProjectSvc(projectRepo, commentRepo, favoriteRepo)
+		projectUsecase := projectusecase.NewProjectUsecase(*projectActor)
 
-		s.projectService(projectActor)
+		commentUsecase := commentusecase.NewCommentUsecase(*projectActor)
+
+		favoriteUsecase := favoriteusecase.NewFavoriteUsecase(*projectActor)
+
+		s.projectService(&projectUsecase)
 
 		// comment service
-		s.commentService(projectActor)
+		s.commentService(&commentUsecase)
 
 		// fav service
-		s.favoriteService(projectActor)
+		s.favoriteService(&favoriteUsecase)
 	}
 
 	s.app.Use(middleware.Logger())

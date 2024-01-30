@@ -21,8 +21,8 @@ grpc-path:
 grpc-fav: 
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-		modules/favorite/favPb/favPb.proto
-
+		modules/favorite/favoritePb/favoritePb.proto
+		
 grpc-com: 
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \

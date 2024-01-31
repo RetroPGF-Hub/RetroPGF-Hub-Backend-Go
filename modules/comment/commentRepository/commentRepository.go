@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type (
@@ -115,8 +116,12 @@ func (r *commentRepository) UpdateComment(pctx context.Context, projectId primit
 			"comments.$.updated_at": utils.LocalTime(),
 		},
 	}
+
+	// descending order
+	options := options.FindOneAndUpdate().SetSort(bson.D{{"comments.created_at", -1}}).SetReturnDocument(options.After)
+
 	updatedComment := new(comment.CommentModel)
-	err := col.FindOneAndUpdate(ctx, filter, update).Decode(&updatedComment)
+	err := col.FindOneAndUpdate(ctx, filter, update, options).Decode(&updatedComment)
 	if err != nil {
 		log.Printf("Error: Update Comment Failed: %s", err.Error())
 		return nil, errors.New("error: update comment failed")

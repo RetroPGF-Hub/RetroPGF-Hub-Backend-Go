@@ -6,13 +6,14 @@ import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
 	"context"
 	"errors"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
 	CommentUsecaseService interface {
-		PushCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId string) error
+		PushCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId string) (*comment.CommentARes, error)
 		UpdateCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId, commentId string) (*comment.CommentRes, error)
 	}
 
@@ -27,35 +28,43 @@ func NewCommentUsecase(pActor modules.ProjectSvcInteractor) CommentUsecaseServic
 	}
 }
 
-func (u *commentUsecase) PushCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId string) error {
+func (u *commentUsecase) PushCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId string) (*comment.CommentARes, error) {
 
 	projectIdPri := utils.ConvertToObjectId(projectId)
 	countProject, err := u.pActor.CommentRepo.CountComment(pctx, projectIdPri)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if countProject == 0 {
-		return errors.New("project you looking for is not exist")
+		return nil, errors.New("project you looking for is not exist")
 	}
 
-	if err := u.pActor.CommentRepo.PushComment(pctx, projectIdPri, &comment.CommentA{
-		CommentId: primitive.NewObjectID(),
-		Title:     req.Title,
-		Content:   req.Content,
-		CreatedBy: req.CreatedBy,
-		CreateAt:  utils.LocalTime(),
-		UpdatedAt: utils.LocalTime(),
-	}); err != nil {
-		return err
+	commentId := primitive.NewObjectID()
+	commentA := new(comment.CommentA)
+	commentA.CommentId = commentId
+	commentA.Title = req.Title
+	commentA.Content = req.Content
+	commentA.CreatedBy = req.CreatedBy
+	commentA.CreateAt = utils.LocalTime()
+	commentA.UpdatedAt = utils.LocalTime()
+
+	if err := u.pActor.CommentRepo.PushComment(pctx, projectIdPri, commentA); err != nil {
+		return nil, err
 	}
 
 	if err := u.pActor.ProjectRepo.UpdateCommentCount(pctx, projectIdPri, 1); err != nil {
-
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &comment.CommentARes{
+		CommentId: commentA.CommentId.Hex(),
+		Title:     commentA.Title,
+		Content:   commentA.Content,
+		CreatedBy: commentA.CreatedBy,
+		CreateAt:  commentA.CreateAt,
+		UpdatedAt: commentA.UpdatedAt,
+	}, nil
 
 }
 
@@ -95,7 +104,7 @@ func (u *commentUsecase) UpdateCommentUsecase(pctx context.Context, req *comment
 			UpdatedAt: v.UpdatedAt,
 		})
 	}
-
+	fmt.Println("data ->", commentRes)
 	return &comment.CommentRes{
 		ProjectId: comments.ProjectId.Hex(),
 		Comments:  commentRes,

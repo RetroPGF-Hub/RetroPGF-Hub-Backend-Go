@@ -20,7 +20,8 @@ type (
 		CountFav(pctx context.Context, userId primitive.ObjectID, projectId string) (int64, int64, error)
 		InsertOneFav(pctx context.Context, req *favorite.FavModel) error
 		DeleteFav(pctx context.Context, userId primitive.ObjectID) error
-		GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID, projectId string) (*favorite.FavModel, error)
+		CountUserFav(pctx context.Context, userId primitive.ObjectID) (int64, error)
+		GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID) (*favorite.FavModel, error)
 	}
 
 	favoriteRepository struct {
@@ -113,6 +114,20 @@ func (r *favoriteRepository) CountFav(pctx context.Context, userId primitive.Obj
 	return result.CountProject, result.CountUser, nil
 }
 
+func (r *favoriteRepository) CountUserFav(pctx context.Context, userId primitive.ObjectID) (int64, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+	db := r.favoriteDbConn(ctx)
+	col := db.Collection("favs")
+
+	count, err := col.CountDocuments(pctx, bson.M{"_id": userId})
+	if err != nil {
+		return -1, errors.New("error: count user fav failed")
+	}
+
+	return count, nil
+}
+
 func (r *favoriteRepository) PushProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
@@ -190,7 +205,7 @@ func (r *favoriteRepository) DeleteFav(pctx context.Context, userId primitive.Ob
 	return nil
 }
 
-func (r *favoriteRepository) GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID, projectId string) (*favorite.FavModel, error) {
+func (r *favoriteRepository) GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID) (*favorite.FavModel, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 	db := r.favoriteDbConn(ctx)

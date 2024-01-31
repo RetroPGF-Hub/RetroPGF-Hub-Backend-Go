@@ -8,10 +8,29 @@ option go_package = "RetroPGF-Hub/RetroPGF-Hub-Backend-Go";
 message GetAllFavReq {
     string userId = 1;
 }
+
 message GetAllFavRes {
     string userId = 1;
-    repeated string projectId = 2;
+    repeated ProjectRes projects = 2;
+
 }
+
+message ProjectRes {
+    string id = 1;
+    string name = 2;
+    string banner_url = 3;
+    string website_url = 4;
+    string crypto_category = 5;
+    string description = 6;
+    string reason = 7;
+    string category = 8;
+    string contact = 9;
+    int64 fav_count = 10;
+    int64 comment_count = 11;
+    string created_by = 12;
+    string created_at = 13;
+}
+
 
 // Method
 service FavGrpcService {

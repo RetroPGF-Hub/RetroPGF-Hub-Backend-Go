@@ -30,5 +30,5 @@ func (s *server) usersService() {
 	users.POST("/register", usersHttpHandler.RegisterUser)
 	users.POST("/login", usersHttpHandler.LoginUser)
 	users.GET("/logout", usersHttpHandler.LogOutUser)
-
+	users.GET("/favs", usersHttpHandler.GetUserFav, s.middleware.JwtAuthorization)
 }

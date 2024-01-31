@@ -4,13 +4,17 @@ import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
 	commentrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentRepository"
+	favPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoritePb"
+
 	commentusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentUsecase"
+	favoritehttphandler "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteHttpHandler"
 	favoriterepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteRepository"
 	favoriteusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteUsecase"
 	middlewarehttphandler "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareHttpHandler"
 	middlewareusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareUsecase"
 	projectrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectRepository"
 	projectusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectUsecase"
+	grpcconn "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/grpcConn"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
 	"context"
 	"log"
@@ -108,6 +112,18 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 		commentUsecase := commentusecase.NewCommentUsecase(*projectActor)
 
 		favoriteUsecase := favoriteusecase.NewFavoriteUsecase(*projectActor)
+
+		favGrpc := favoritehttphandler.NewfavGrpcHandler(favoriteUsecase)
+
+		// Grpc client
+		go func() {
+			grpcServer, lis := grpcconn.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.FavUrl)
+
+			favPb.RegisterFavGrpcServiceServer(grpcServer, favGrpc)
+
+			log.Printf("Fav grpc listening on %s", s.cfg.Grpc.FavUrl)
+			grpcServer.Serve(lis)
+		}()
 
 		s.projectService(&projectUsecase)
 

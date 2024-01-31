@@ -56,37 +56,56 @@ func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, req *proj
 		return nil, err
 	}
 
-	// done
-	// create empty docs to fav using grpc
-	// in case someething wrong with this grpc conn the project going to ge remove
-	if err := u.pActor.FavoriteRepo.InsertOneFav(pctx, &favorite.FavModel{
-		User:      utils.ConvertToObjectId(req.CreatedBy),
-		ProjectId: []string{},
-		CreateAt:  utils.LocalTime(),
-		UpdatedAt: utils.LocalTime(),
-	}); err != nil {
+	countU, err := u.pActor.FavoriteRepo.CountUserFav(pctx, utils.ConvertToObjectId(req.CreatedBy))
+	if err != nil {
 		if err := u.pActor.ProjectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
 			return nil, err
 		}
-		return nil, err
+	}
+	if countU == 0 {
+		// done
+		// create empty docs to fav using grpc
+		// in case something wrong with this grpc conn the project going to ge remove
+		if err := u.pActor.FavoriteRepo.InsertOneFav(pctx, &favorite.FavModel{
+			User:      utils.ConvertToObjectId(req.CreatedBy),
+			ProjectId: []string{},
+			CreateAt:  utils.LocalTime(),
+			UpdatedAt: utils.LocalTime(),
+		}); err != nil {
+			if err := u.pActor.ProjectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
+				return nil, err
+			}
+			return nil, err
+		}
 	}
 
-	// done
-	// create empty docs to comment using grpc
-	// in case someething wrong with this grpc conn the project going to ge remove
-	if err := u.pActor.CommentRepo.InsertEmptyComment(pctx, &comment.CommentModel{
-		ProjectId: projectId,
-		Comments:  []comment.CommentA{},
-		CreateAt:  utils.LocalTime(),
-		UpdatedAt: utils.LocalTime(),
-	}); err != nil {
+	countP, err := u.pActor.CommentRepo.CountCommentProject(pctx, projectId)
+	if err != nil {
 		if err := u.pActor.ProjectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
 			return nil, err
 		}
 		if err := u.pActor.FavoriteRepo.DeleteFav(pctx, projectId); err != nil {
 			return nil, err
 		}
-		return nil, err
+	}
+	if countP == 0 {
+		// done
+		// create empty docs to comment using grpc
+		// in case someething wrong with this grpc conn the project going to ge remove
+		if err := u.pActor.CommentRepo.InsertEmptyComment(pctx, &comment.CommentModel{
+			ProjectId: projectId,
+			Comments:  []comment.CommentA{},
+			CreateAt:  utils.LocalTime(),
+			UpdatedAt: utils.LocalTime(),
+		}); err != nil {
+			if err := u.pActor.ProjectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
+				return nil, err
+			}
+			if err := u.pActor.FavoriteRepo.DeleteFav(pctx, projectId); err != nil {
+				return nil, err
+			}
+			return nil, err
+		}
 	}
 
 	projectData, err := u.pActor.ProjectRepo.FindOneProject(pctx, projectId)

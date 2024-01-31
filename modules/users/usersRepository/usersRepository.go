@@ -1,10 +1,14 @@
 package usersrepository
 
 import (
+	favPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoritePb"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users"
+	grpcconn "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/grpcConn"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
 	"context"
 	"errors"
 	"log"
+
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,6 +24,7 @@ type (
 		IsUniqueUser(pctx context.Context, email string) (bool, error)
 		FindOneUserWithEmail(pctx context.Context, email string) (*users.UserDb, error)
 		FindOneUserWithId(pctx context.Context, userId primitive.ObjectID) (*users.UserDb, error)
+		GetFavProjectByUserId(pctx context.Context, favGrpcUrl, userId string) (*favPb.GetAllFavRes, error)
 	}
 
 	usersRepository struct {
@@ -136,4 +141,22 @@ func (r *usersRepository) IsUniqueUser(pctx context.Context, email string) (bool
 		return true, nil
 	}
 
+}
+
+func (r *usersRepository) GetFavProjectByUserId(pctx context.Context, favGrpcUrl, userId string) (*favPb.GetAllFavRes, error) {
+	jwtauth.SetApiKeyInContext(&pctx)
+	conn, err := grpcconn.NewGrpcClient(favGrpcUrl)
+	if err != nil {
+		log.Printf("Error: Grpc Conn Error %s", err.Error())
+		return nil, errors.New("error: grpc connection to fav failed")
+	}
+
+	result, err := conn.Fav().GetAllFavByUserId(pctx, &favPb.GetAllFavReq{
+		UserId: userId,
+	})
+	if err != nil {
+		log.Printf("Error: Create Fav For Project Error %s", err.Error())
+		return nil, errors.New("errors")
+	}
+	return result, nil
 }

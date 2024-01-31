@@ -19,6 +19,7 @@ type (
 		PushComment(pctx context.Context, projectId primitive.ObjectID, req *comment.CommentA) error
 		PullComment(pctx context.Context, projectId primitive.ObjectID, commentId primitive.ObjectID) error
 		CountComment(pctx context.Context, projectId primitive.ObjectID) (int64, error)
+		CountCommentProject(pctx context.Context, projectId primitive.ObjectID) (int64, error)
 		UpdateComment(pctx context.Context, projectId primitive.ObjectID, req *comment.CommentA) (*comment.CommentModel, error)
 		DeleteCommentDoc(pctx context.Context, projectId primitive.ObjectID) error
 	}
@@ -158,4 +159,20 @@ func (r *commentRepository) DeleteCommentDoc(pctx context.Context, projectId pri
 	}
 
 	return nil
+}
+
+func (r *commentRepository) CountCommentProject(pctx context.Context, projectId primitive.ObjectID) (int64, error) {
+
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.commentDbConn(ctx)
+	col := db.Collection("comments")
+	count, err := col.CountDocuments(pctx, bson.M{"_id": projectId})
+	if err != nil {
+		return -1, errors.New("error: count comment project failed")
+	}
+
+	return count, nil
+
 }

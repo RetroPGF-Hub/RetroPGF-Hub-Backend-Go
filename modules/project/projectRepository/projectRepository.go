@@ -26,6 +26,7 @@ type (
 		DeleteProject(pctx context.Context, projectId primitive.ObjectID, userId string) error
 		UpdateFavCount(pctx context.Context, projectId primitive.ObjectID, counter int64) error
 		UpdateCommentCount(pctx context.Context, projectId primitive.ObjectID, counter int64) error
+		FindManyProjectId(pctx context.Context, projectId []primitive.ObjectID) ([]*project.ProjectModel, error)
 	}
 
 	projectRepository struct {
@@ -224,4 +225,67 @@ func (r *projectRepository) FindOneUserWithId(pctx context.Context, grpcUrl stri
 	}
 
 	return result, nil
+}
+
+func (r *projectRepository) FindManyProjectId(pctx context.Context, projectId []primitive.ObjectID) ([]*project.ProjectModel, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+	db := r.projectDbConn(ctx)
+	col := db.Collection("projects")
+
+	matchInState := bson.D{
+		{"$match",
+			bson.D{
+				{"_id",
+					bson.D{
+						{"$in",
+							projectId,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	projectInState := bson.D{
+		{"$project",
+			bson.D{
+				{"_id", 1},
+				{"name", 1},
+				{"banner_url", 1},
+				{"website_url", 1},
+				{"crypto_category", 1},
+				{"description", 1},
+				{"reason", 1},
+				{"category", 1},
+				{"contact", 1},
+				{"fav_count", 1},
+				{"comment_count", 1},
+				{"created_by", 1},
+				{"created_at", 1},
+			},
+		},
+	}
+
+	pipeline := mongo.Pipeline{matchInState, projectInState}
+
+	cursor, err := col.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var projects []*project.ProjectModel
+
+	for cursor.Next(ctx) {
+		var result project.ProjectModel
+		err := cursor.Decode(&result)
+		if err != nil {
+			return nil, errors.New("error: decoding result failed")
+		}
+		projects = append(projects, &result)
+	}
+
+	return projects, nil
+
 }

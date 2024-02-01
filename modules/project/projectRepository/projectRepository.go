@@ -29,6 +29,7 @@ type (
 		UpdateCommentCount(pctx context.Context, projectId primitive.ObjectID, counter int64) error
 		FindManyProjectId(pctx context.Context, projectId []primitive.ObjectID) ([]*project.ProjectModel, error)
 		FindAllProjectDatacenter(pctx context.Context, grpcUrl string, req *datacenterPb.GetProjectDataCenterReq) (*datacenterPb.GetProjectDataCenterRes, error)
+		FindManyUserInfo(pctx context.Context, grpcUrl string, req *usersPb.GetManyUserInfoForProjectReq) (*usersPb.GetManyUserInfoForProjectRes, error)
 	}
 
 	projectRepository struct {
@@ -310,6 +311,25 @@ func (r *projectRepository) FindAllProjectDatacenter(pctx context.Context, grpcU
 	if err != nil {
 		log.Printf("Error: Find All Project Error %s", err.Error())
 		return nil, errors.New("error: find all project failed")
+	}
+
+	return result, nil
+}
+
+func (r *projectRepository) FindManyUserInfo(pctx context.Context, grpcUrl string, req *usersPb.GetManyUserInfoForProjectReq) (*usersPb.GetManyUserInfoForProjectRes, error) {
+	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
+	defer cancel()
+
+	jwtauth.SetApiKeyInContext(&ctx)
+	conn, err := grpcconn.NewGrpcClient(grpcUrl)
+	if err != nil {
+		log.Printf("Error: Grpc Conn Error %s", err.Error())
+		return nil, errors.New("error: grpc connection failed")
+	}
+	result, err := conn.Users().GetManyUserInfoForProject(ctx, req)
+	if err != nil {
+		log.Printf("Error: Find Many User Info Error %s", err.Error())
+		return nil, errors.New("error: find many user info failed")
 	}
 
 	return result, nil

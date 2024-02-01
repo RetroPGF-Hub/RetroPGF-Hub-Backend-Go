@@ -25,6 +25,7 @@ type (
 		FindOneUserWithEmail(pctx context.Context, email string) (*users.UserDb, error)
 		FindOneUserWithId(pctx context.Context, userId primitive.ObjectID) (*users.UserDb, error)
 		GetFavProjectByUserId(pctx context.Context, favGrpcUrl, userId string) (*favPb.GetAllFavRes, error)
+		FindManyUserId(pctx context.Context, usersId []primitive.ObjectID) ([]*users.UserDb, error)
 	}
 
 	usersRepository struct {
@@ -141,6 +142,60 @@ func (r *usersRepository) IsUniqueUser(pctx context.Context, email string) (bool
 		return true, nil
 	}
 
+}
+
+func (r *usersRepository) FindManyUserId(pctx context.Context, usersId []primitive.ObjectID) ([]*users.UserDb, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.userDbConn(ctx)
+	col := db.Collection("users")
+
+	matchInState := bson.D{
+		{"$match",
+			bson.D{
+				{"_id",
+					bson.D{
+						{"$in",
+							usersId,
+						},
+					},
+				},
+			},
+		},
+	}
+	projectInState := bson.D{
+		{"$project",
+			bson.D{
+				{"_id", 1},
+				{"email", 1},
+				{"source", 1},
+				{"profile", 1},
+				{"user_name", 1},
+				{"first_name", 1},
+				{"last_name", 1},
+			},
+		},
+	}
+	pipeline := mongo.Pipeline{matchInState, projectInState}
+	cursor, err := col.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var rUsers []*users.UserDb
+
+	for cursor.Next(ctx) {
+		var result users.UserDb
+		err := cursor.Decode(&result)
+		if err != nil {
+			return nil, errors.New("error: decoding result failed")
+		}
+		rUsers = append(rUsers, &result)
+	}
+
+	return rUsers, nil
 }
 
 func (r *usersRepository) GetFavProjectByUserId(pctx context.Context, favGrpcUrl, userId string) (*favPb.GetAllFavRes, error) {

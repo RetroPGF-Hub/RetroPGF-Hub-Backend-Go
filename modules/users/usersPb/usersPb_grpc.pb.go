@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UsersGrpcServiceClient interface {
 	GetUserInfoById(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoRes, error)
+	GetManyUserInfoForProject(ctx context.Context, in *GetManyUserInfoForProjectReq, opts ...grpc.CallOption) (*GetManyUserInfoForProjectRes, error)
 }
 
 type usersGrpcServiceClient struct {
@@ -42,11 +43,21 @@ func (c *usersGrpcServiceClient) GetUserInfoById(ctx context.Context, in *GetUse
 	return out, nil
 }
 
+func (c *usersGrpcServiceClient) GetManyUserInfoForProject(ctx context.Context, in *GetManyUserInfoForProjectReq, opts ...grpc.CallOption) (*GetManyUserInfoForProjectRes, error) {
+	out := new(GetManyUserInfoForProjectRes)
+	err := c.cc.Invoke(ctx, "/UsersGrpcService/GetManyUserInfoForProject", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UsersGrpcServiceServer is the server API for UsersGrpcService service.
 // All implementations must embed UnimplementedUsersGrpcServiceServer
 // for forward compatibility
 type UsersGrpcServiceServer interface {
 	GetUserInfoById(context.Context, *GetUserInfoReq) (*GetUserInfoRes, error)
+	GetManyUserInfoForProject(context.Context, *GetManyUserInfoForProjectReq) (*GetManyUserInfoForProjectRes, error)
 	mustEmbedUnimplementedUsersGrpcServiceServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedUsersGrpcServiceServer struct {
 
 func (UnimplementedUsersGrpcServiceServer) GetUserInfoById(context.Context, *GetUserInfoReq) (*GetUserInfoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfoById not implemented")
+}
+func (UnimplementedUsersGrpcServiceServer) GetManyUserInfoForProject(context.Context, *GetManyUserInfoForProjectReq) (*GetManyUserInfoForProjectRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetManyUserInfoForProject not implemented")
 }
 func (UnimplementedUsersGrpcServiceServer) mustEmbedUnimplementedUsersGrpcServiceServer() {}
 
@@ -88,6 +102,24 @@ func _UsersGrpcService_GetUserInfoById_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UsersGrpcService_GetManyUserInfoForProject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetManyUserInfoForProjectReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersGrpcServiceServer).GetManyUserInfoForProject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/UsersGrpcService/GetManyUserInfoForProject",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersGrpcServiceServer).GetManyUserInfoForProject(ctx, req.(*GetManyUserInfoForProjectReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UsersGrpcService_ServiceDesc is the grpc.ServiceDesc for UsersGrpcService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var UsersGrpcService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserInfoById",
 			Handler:    _UsersGrpcService_GetUserInfoById_Handler,
+		},
+		{
+			MethodName: "GetManyUserInfoForProject",
+			Handler:    _UsersGrpcService_GetManyUserInfoForProject_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -8,7 +8,6 @@ import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
 	"context"
-	"fmt"
 
 	datacenterPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterPb"
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
@@ -19,7 +18,7 @@ import (
 type (
 	ProjectUsecaseService interface {
 		CreateNewProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, req *project.InsertProjectReq) (*project.ProjectRes, error)
-		FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.ProjectResWithUser, error)
+		FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.FullProjectRes, error)
 		UpdateOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string, req *project.InsertProjectReq) (*project.ProjectResWithUser, error)
 		DeleteOneProjectUsecase(pctx context.Context, projectId, userId string) error
 		FindAllProjectDatacenterUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip int64, userId string) ([]*project.ProjectRes, error)
@@ -132,36 +131,6 @@ func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, grpcCfg *
 	}, nil
 }
 
-func (u *projectUsecase) FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.ProjectResWithUser, error) {
-	fmt.Println("testing")
-
-	projectD, err := u.pActor.ProjectRepo.FindOneProject(pctx, projectId, grpcCfg.DatacenterUrl)
-	if err != nil {
-		return nil, err
-	}
-
-	projectOwner, err := u.pActor.ProjectRepo.FindOneUserWithId(pctx, grpcCfg.UserUrl, &usersPb.GetUserInfoReq{
-		UserId: projectD.Projects.CreatedBy,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if len(userId) > 5 {
-
-		countFav, err := u.pActor.FavoriteRepo.CountUserFav(pctx, utils.ConvertToObjectId(userId))
-		if err != nil {
-			return nil, err
-		}
-		var fav bool = false
-		if countFav != 0 {
-			fav = true
-		}
-		return u.convertPDatacenterToPWithUser(projectD, projectOwner, fav)
-	}
-
-	return u.convertPDatacenterToPWithUser(projectD, projectOwner, false)
-}
-
 func (u *projectUsecase) UpdateOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string, req *project.InsertProjectReq) (*project.ProjectResWithUser, error) {
 	projectD, err := u.pActor.ProjectRepo.UpdateProject(pctx, &project.ProjectModel{
 		Id:             utils.ConvertToObjectId(projectId),
@@ -246,4 +215,39 @@ func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, g
 	}
 
 	return projectRes, nil
+}
+
+func (u *projectUsecase) FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.FullProjectRes, error) {
+
+	projectD, err := u.pActor.ProjectRepo.FindOneProject(pctx, projectId, grpcCfg.DatacenterUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	rawComment, err := u.pActor.CommentRepo.FindCommentByProjectId(pctx, utils.ConvertToObjectId(projectId))
+	if err != nil {
+		return nil, err
+	}
+
+	usersId := u.accumateUserId(rawComment)
+	usersId = append(usersId, projectD.Projects.CreatedBy)
+
+	usersInfo, err := u.pActor.ProjectRepo.FindManyUserInfo(pctx, grpcCfg.UserUrl, &usersPb.GetManyUserInfoForProjectReq{UsersId: usersId})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(userId) > 5 {
+		countFav, err := u.pActor.FavoriteRepo.CountUserFav(pctx, utils.ConvertToObjectId(userId))
+		if err != nil {
+			return nil, err
+		}
+		var fav bool = false
+		if countFav != 0 {
+			fav = true
+		}
+		return u.convertPDatacenterToPWithUser(projectD, fav, rawComment, usersInfo.UsersProfile)
+	}
+
+	return u.convertPDatacenterToPWithUser(projectD, false, rawComment, usersInfo.UsersProfile)
 }

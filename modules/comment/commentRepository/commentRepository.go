@@ -23,6 +23,7 @@ type (
 		CountCommentProject(pctx context.Context, projectId primitive.ObjectID) (int64, error)
 		UpdateComment(pctx context.Context, projectId primitive.ObjectID, req *comment.CommentA) (*comment.CommentModel, error)
 		DeleteCommentDoc(pctx context.Context, projectId primitive.ObjectID) error
+		FindCommentByProjectId(pctx context.Context, projectId primitive.ObjectID) (*comment.CommentModel, error)
 	}
 
 	commentRepository struct {
@@ -179,5 +180,21 @@ func (r *commentRepository) CountCommentProject(pctx context.Context, projectId 
 	}
 
 	return count, nil
+
+}
+
+func (r *commentRepository) FindCommentByProjectId(pctx context.Context, projectId primitive.ObjectID) (*comment.CommentModel, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+
+	db := r.commentDbConn(ctx)
+	col := db.Collection("comments")
+
+	comment := new(comment.CommentModel)
+	if err := col.FindOne(pctx, bson.M{"_id": projectId}).Decode(&comment); err != nil {
+		return nil, errors.New("error: find comment by projectId failed")
+	}
+
+	return comment, nil
 
 }

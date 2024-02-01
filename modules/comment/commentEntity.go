@@ -1,6 +1,9 @@
 package comment
 
-import "time"
+import (
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users"
+	"time"
+)
 
 type (
 	PushCommentReq struct {
@@ -14,16 +17,25 @@ type (
 	CommentRes struct {
 		ProjectId string        `json:"projectId"`
 		Comments  []CommentARes `json:"comments"`
-		CreateAt  time.Time     `json:"created_at"`
-		UpdatedAt time.Time     `json:"updated_at"`
+		CreateAt  time.Time     `json:"createdAt"`
+		UpdatedAt time.Time     `json:"updatedAt"`
 	}
 
 	CommentARes struct {
 		CommentId string    `json:"commentId"`
 		Title     string    `json:"title"`
 		Content   string    `json:"content"`
-		CreatedBy string    `json:"created_by"`
-		CreateAt  time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
+		CreatedBy string    `json:"createdBy"`
+		CreateAt  time.Time `json:"createdAt"`
+		UpdatedAt time.Time `json:"updatedAt"`
+	}
+
+	CommentAResWithUser struct {
+		CommentId string               `json:"commentId"`
+		Title     string               `json:"title"`
+		Content   string               `json:"content"`
+		CreatedBy users.UserProfileRes `json:"createdBy"`
+		CreateAt  time.Time            `json:"createdAt"`
+		UpdatedAt time.Time            `json:"updatedAt"`
 	}
 )

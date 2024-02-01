@@ -12,7 +12,9 @@ func (s *server) projectService(projectUsecase *projectusecase.ProjectUsecaseSer
 
 	projects := s.app.Group("/project_v1")
 	projects.POST("/create", projectHttpHandler.CreateNewProjectHttp, s.middleware.JwtAuthorization)
-	projects.GET("/project/:projectId", projectHttpHandler.FindOneProjectHttp, s.middleware.JwtAuthorization)
+	projects.GET("/projects", projectHttpHandler.FindAllProeject, s.middleware.JwtOptional)
+	projects.GET("/project/:projectId", projectHttpHandler.FindOneProjectHttp, s.middleware.JwtOptional)
 	projects.PATCH("/project/:projectId", projectHttpHandler.UpdateOneProjectHttp, s.middleware.JwtAuthorization)
 	projects.DELETE("/project/:projectId", projectHttpHandler.DeleteOneProjectHttp, s.middleware.JwtAuthorization)
+
 }

@@ -45,10 +45,10 @@ type (
 	}
 
 	Grpc struct {
-		UserUrl    string
-		ProjectUrl string
-		FavUrl     string
-		CommentUrl string
+		UserUrl       string
+		ProjectUrl    string
+		DatacenterUrl string
+		CommentUrl    string
 	}
 )
 
@@ -93,10 +93,9 @@ func LoadConfig(path string) Config {
 			}(),
 		},
 		Grpc: Grpc{
-			UserUrl:    os.Getenv("GRPC_USERS_URL"),
-			ProjectUrl: os.Getenv("GRPC_PROJECT_URL"),
-			FavUrl:     os.Getenv("GRPC_FAV_URL"),
-			CommentUrl: os.Getenv("GRPC_COM_URL"),
+			UserUrl:       os.Getenv("GRPC_USERS_URL"),
+			ProjectUrl:    os.Getenv("GRPC_PROJECT_URL"),
+			DatacenterUrl: os.Getenv("GRPC_DATACENTER_URL"),
 		},
 
 		// Redis: Redis{

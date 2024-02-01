@@ -4,6 +4,7 @@ import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
 	middlewareusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareUsecase"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/response"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -12,6 +13,7 @@ import (
 type (
 	MiddlewareHttpHandlerService interface {
 		JwtAuthorization(next echo.HandlerFunc) echo.HandlerFunc
+		JwtOptional(next echo.HandlerFunc) echo.HandlerFunc
 	}
 
 	middlewareHttpHandler struct {
@@ -39,5 +41,27 @@ func (h *middlewareHttpHandler) JwtAuthorization(next echo.HandlerFunc) echo.Han
 			return response.ErrResponse(c, http.StatusUnauthorized, err.Error())
 		}
 		return next(newCtx)
+	}
+}
+
+func (h *middlewareHttpHandler) JwtOptional(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		accessToken := c.Request().Header.Get("accessToken")
+		if len(accessToken) > 10 {
+			log.Println("inside accessToken")
+			newCtx, err := h.middlewareUsecase.JwtAuthorization(c, h.cfg, accessToken)
+			if err != nil {
+				return response.ErrResponse(c, http.StatusUnauthorized, err.Error())
+			}
+			return next(newCtx)
+		} else {
+			c.Set("user_id", "")
+			c.Set("email", "")
+			c.Set("source", "")
+			return next(c)
+
+		}
+
 	}
 }

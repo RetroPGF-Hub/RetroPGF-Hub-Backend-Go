@@ -6,8 +6,8 @@ users:
 project:
 	go run main.go ./env/.env.project
 
-fav:
-	go run main.go ./env/.env.fav
+datacenter:
+	go run main.go ./env/.env.datacenter
 
 db-up:
 	docker compose -f docker-compose.db.yaml up -d
@@ -23,10 +23,12 @@ grpc-fav:
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
 		modules/favorite/favoritePb/favoritePb.proto
 		
-grpc-com: 
+
+grpc-datacenter: 
 	protoc --go_out=. --go_opt=paths=source_relative \
 		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-		modules/comment/commentPb/commentPb.proto
+		modules/datacenter/datacenterPb/datacenterPb.proto
+
 
 grpc-users: 
 	protoc --go_out=. --go_opt=paths=source_relative \

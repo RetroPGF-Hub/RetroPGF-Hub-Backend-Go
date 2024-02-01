@@ -80,12 +80,13 @@ func (u *favoriteUsecase) GetAllProjectByUserId(pctx context.Context, req *favPb
 		return nil, err
 	}
 
-	projectsRes := make([]*favPb.ProjectRes, 0)
+	projectsRes := make([]*favPb.ProjectResForFav, 0)
 
 	for _, v := range projects {
-		projectsRes = append(projectsRes, &favPb.ProjectRes{
+		projectsRes = append(projectsRes, &favPb.ProjectResForFav{
 			Id:             v.Id.Hex(),
 			Name:           v.Name,
+			LogoUrl:        v.LogoUrl,
 			BannerUrl:      v.BannerUrl,
 			WebsiteUrl:     v.WebsiteUrl,
 			CryptoCategory: v.CryptoCategory,

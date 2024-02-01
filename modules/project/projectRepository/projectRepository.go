@@ -1,6 +1,7 @@
 package projectrepository
 
 import (
+	datacenterPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterPb"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project"
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
 	grpcconn "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/grpcConn"
@@ -19,14 +20,15 @@ import (
 
 type (
 	ProjectRepositoryService interface {
-		InsertOneProject(pctx context.Context, req *project.ProjectModel, favGrpcUrl string) (primitive.ObjectID, error)
-		FindOneProject(pctx context.Context, projectId primitive.ObjectID) (*project.ProjectModel, error)
+		InsertOneProject(pctx context.Context, req *project.ProjectModel) (primitive.ObjectID, error)
+		FindOneProject(pctx context.Context, projectId, datacenterUrl string) (*datacenterPb.GetSingleProjectDataCenterRes, error)
 		FindOneUserWithId(pctx context.Context, grpcUrl string, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error)
 		UpdateProject(pctx context.Context, req *project.ProjectModel, userId string) (*project.ProjectModel, error)
 		DeleteProject(pctx context.Context, projectId primitive.ObjectID, userId string) error
 		UpdateFavCount(pctx context.Context, projectId primitive.ObjectID, counter int64) error
 		UpdateCommentCount(pctx context.Context, projectId primitive.ObjectID, counter int64) error
 		FindManyProjectId(pctx context.Context, projectId []primitive.ObjectID) ([]*project.ProjectModel, error)
+		FindAllProjectDatacenter(pctx context.Context, grpcUrl string, req *datacenterPb.GetProjectDataCenterReq) (*datacenterPb.GetProjectDataCenterRes, error)
 	}
 
 	projectRepository struct {
@@ -44,7 +46,7 @@ func NewProjectRepository(db *mongo.Client) ProjectRepositoryService {
 	}
 }
 
-func (r *projectRepository) InsertOneProject(pctx context.Context, req *project.ProjectModel, favGrpcUrl string) (primitive.ObjectID, error) {
+func (r *projectRepository) InsertOneProject(pctx context.Context, req *project.ProjectModel) (primitive.ObjectID, error) {
 
 	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
 	defer cancel()
@@ -60,17 +62,20 @@ func (r *projectRepository) InsertOneProject(pctx context.Context, req *project.
 
 }
 
-func (r *projectRepository) FindOneProject(pctx context.Context, projectId primitive.ObjectID) (*project.ProjectModel, error) {
-	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+func (r *projectRepository) FindOneProject(pctx context.Context, projectId, datacenterUrl string) (*datacenterPb.GetSingleProjectDataCenterRes, error) {
+	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
 	defer cancel()
 
-	db := r.projectDbConn(ctx)
-	col := db.Collection("projects")
-
-	result := new(project.ProjectModel)
-
-	if err := col.FindOne(ctx, bson.M{"_id": projectId}).Decode(result); err != nil {
-		return nil, errors.New("error: project id not found")
+	jwtauth.SetApiKeyInContext(&ctx)
+	conn, err := grpcconn.NewGrpcClient(datacenterUrl)
+	if err != nil {
+		log.Printf("Error: Grpc Conn Error %s", err.Error())
+		return nil, errors.New("error: grpc connection failed")
+	}
+	result, err := conn.Datacenter().GetSingleProjectDataCenter(ctx, &datacenterPb.GetSingleProjectDataCenterReq{ProjecId: projectId})
+	if err != nil {
+		log.Printf("Error: Find One Project Error %s", err.Error())
+		return nil, errors.New("error: find one project failed")
 	}
 
 	return result, nil
@@ -221,7 +226,7 @@ func (r *projectRepository) FindOneUserWithId(pctx context.Context, grpcUrl stri
 	result, err := conn.Users().GetUserInfoById(ctx, req)
 	if err != nil {
 		log.Printf("Error: Find One User For Project Error %s", err.Error())
-		return nil, errors.New("error: find out user for project not found")
+		return nil, errors.New("error: find one user for project not found")
 	}
 
 	return result, nil
@@ -253,6 +258,7 @@ func (r *projectRepository) FindManyProjectId(pctx context.Context, projectId []
 				{"_id", 1},
 				{"name", 1},
 				{"banner_url", 1},
+				{"logo_url", 1},
 				{"website_url", 1},
 				{"crypto_category", 1},
 				{"description", 1},
@@ -288,4 +294,23 @@ func (r *projectRepository) FindManyProjectId(pctx context.Context, projectId []
 
 	return projects, nil
 
+}
+
+func (r *projectRepository) FindAllProjectDatacenter(pctx context.Context, grpcUrl string, req *datacenterPb.GetProjectDataCenterReq) (*datacenterPb.GetProjectDataCenterRes, error) {
+	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
+	defer cancel()
+
+	jwtauth.SetApiKeyInContext(&ctx)
+	conn, err := grpcconn.NewGrpcClient(grpcUrl)
+	if err != nil {
+		log.Printf("Error: Grpc Conn Error %s", err.Error())
+		return nil, errors.New("error: grpc connection failed")
+	}
+	result, err := conn.Datacenter().GetProjectDataCenter(ctx, req)
+	if err != nil {
+		log.Printf("Error: Find All Project Error %s", err.Error())
+		return nil, errors.New("error: find all project failed")
+	}
+
+	return result, nil
 }

@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+// Package name
+option go_package = "RetroPGF-Hub/RetroPGF-Hub-Backend-Go";
+
+
+// Structures
+message GetProjectDataCenterReq {
+    int64 limit = 1;
+    int64 skip = 2;
+}
+
+message GetSingleProjectDataCenterReq {
+    string projecId = 1;
+}
+
+message GetProjectDataCenterRes {
+    repeated ProjectRes projects = 1;
+}
+
+message GetSingleProjectDataCenterRes {
+    ProjectRes projects = 1;
+}
+
+message ProjectRes {
+    string id = 1;
+    string name = 2;
+    string logo_url = 3;
+    string banner_url = 4;
+    string website_url = 5;
+    string crypto_category = 6;
+    string description = 7;
+    string reason = 8;
+    string category = 9;
+    string contact = 10;
+    int64 fav_count = 11;
+    int64 comment_count = 12;
+    string created_by = 13;
+    string created_at = 14;
+    string updated_at = 15;
+}
+
+
+// Method
+service DataCenterGrpcService {
+    rpc GetProjectDataCenter(GetProjectDataCenterReq) returns (GetProjectDataCenterRes);
+    rpc GetSingleProjectDataCenter(GetSingleProjectDataCenterReq) returns (GetSingleProjectDataCenterRes);
+}
+
+

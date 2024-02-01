@@ -100,6 +100,8 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	switch s.cfg.App.Name {
 	case "users":
 		s.usersService()
+	case "datacenter":
+		s.datacenterService()
 	case "project":
 
 		projectRepo := projectrepository.NewProjectRepository(s.db)
@@ -117,11 +119,11 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 
 		// Grpc client
 		go func() {
-			grpcServer, lis := grpcconn.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.FavUrl)
+			grpcServer, lis := grpcconn.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.ProjectUrl)
 
 			favPb.RegisterFavGrpcServiceServer(grpcServer, favGrpc)
 
-			log.Printf("Fav grpc listening on %s", s.cfg.Grpc.FavUrl)
+			log.Printf("Fav grpc listening on %s", s.cfg.Grpc.ProjectUrl)
 			grpcServer.Serve(lis)
 		}()
 

@@ -133,7 +133,7 @@ func (u *usersUsecase) LoginUsecase(cfg *config.Config, pctx context.Context, em
 }
 
 func (u *usersUsecase) GetUserFavs(pctx context.Context, cfg *config.Grpc, userId string) (*favPb.GetAllFavRes, error) {
-	projects, err := u.usersRepo.GetFavProjectByUserId(pctx, cfg.FavUrl, userId)
+	projects, err := u.usersRepo.GetFavProjectByUserId(pctx, cfg.ProjectUrl, userId)
 	if err != nil {
 		return nil, err
 	}

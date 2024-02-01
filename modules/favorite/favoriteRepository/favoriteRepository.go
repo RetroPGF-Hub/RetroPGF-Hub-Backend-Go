@@ -219,5 +219,4 @@ func (r *favoriteRepository) GetAllProjectInUser(pctx context.Context, userId pr
 	}
 
 	return result, nil
-
 }

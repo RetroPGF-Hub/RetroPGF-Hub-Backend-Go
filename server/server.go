@@ -2,8 +2,19 @@ package server
 
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
+	commentrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentRepository"
+	favPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoritePb"
+
+	commentusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentUsecase"
+	favoritehttphandler "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteHttpHandler"
+	favoriterepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteRepository"
+	favoriteusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoriteUsecase"
 	middlewarehttphandler "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareHttpHandler"
 	middlewareusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareUsecase"
+	projectrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectRepository"
+	projectusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectUsecase"
+	grpcconn "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/grpcConn"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
 	"context"
 	"log"
@@ -15,11 +26,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type (
 	server struct {
+		redis      *redis.Client
 		app        *echo.Echo
 		db         *mongo.Client
 		cfg        *config.Config
@@ -55,6 +68,8 @@ func (s *server) httpListening() {
 
 func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	s := &server{
+		// redis:      redisactor.RedisConn(&cfg.Redis),
+		redis:      nil,
 		db:         db,
 		cfg:        cfg,
 		app:        echo.New(),
@@ -85,8 +100,40 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	switch s.cfg.App.Name {
 	case "users":
 		s.usersService()
+	case "datacenter":
+		s.datacenterService()
 	case "project":
-		s.projectService()
+
+		projectRepo := projectrepository.NewProjectRepository(s.db)
+		commentRepo := commentrepository.NewCommentRepository(s.db)
+		favoriteRepo := favoriterepository.NewFavoriteRepository(s.db)
+
+		projectActor := modules.NewProjectSvc(projectRepo, commentRepo, favoriteRepo)
+		projectUsecase := projectusecase.NewProjectUsecase(*projectActor)
+
+		commentUsecase := commentusecase.NewCommentUsecase(*projectActor)
+
+		favoriteUsecase := favoriteusecase.NewFavoriteUsecase(*projectActor)
+
+		favGrpc := favoritehttphandler.NewfavGrpcHandler(favoriteUsecase)
+
+		// Grpc client
+		go func() {
+			grpcServer, lis := grpcconn.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.ProjectUrl)
+
+			favPb.RegisterFavGrpcServiceServer(grpcServer, favGrpc)
+
+			log.Printf("Fav grpc listening on %s", s.cfg.Grpc.ProjectUrl)
+			grpcServer.Serve(lis)
+		}()
+
+		s.projectService(&projectUsecase)
+
+		// comment service
+		s.commentService(&commentUsecase)
+
+		// fav service
+		s.favoriteService(&favoriteUsecase)
 	}
 
 	s.app.Use(middleware.Logger())

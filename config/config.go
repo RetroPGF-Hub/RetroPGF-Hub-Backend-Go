@@ -10,10 +10,11 @@ import (
 
 type (
 	Config struct {
-		App  App
-		Db   Db
-		Jwt  Jwt
-		Grpc Grpc
+		App   App
+		Db    Db
+		Jwt   Jwt
+		Grpc  Grpc
+		Redis Redis
 	}
 
 	App struct {
@@ -24,6 +25,12 @@ type (
 
 	Db struct {
 		Url string
+	}
+
+	Redis struct {
+		Addr     string
+		Password string
+		DB       int
 	}
 
 	Jwt struct {
@@ -38,17 +45,22 @@ type (
 	}
 
 	Grpc struct {
-		UserUrl    string
-		ProjectUrl string
+		UserUrl       string
+		ProjectUrl    string
+		DatacenterUrl string
+		CommentUrl    string
 	}
 )
 
 func LoadConfig(path string) Config {
 	if err := godotenv.Load(path); err != nil {
-		log.Fatal("Error loading .env file : %s", err.Error())
+		log.Fatalf("Error loading .env file : %s", err.Error())
 	}
-	log.Println(os.Getenv("JWT_API_SECRET_KEY"))
 
+	// redisDb, err := strconv.Atoi(os.Getenv("REDIS_DB"))
+	// if err != nil {
+	// 	log.Fatalf("Error can't convert REDIS_DB to int")
+	// }
 	return Config{
 		App: App{
 			Name:  os.Getenv("APP_NAME"),
@@ -81,9 +93,16 @@ func LoadConfig(path string) Config {
 			}(),
 		},
 		Grpc: Grpc{
-			UserUrl:    os.Getenv("GRPC_USERS_URL"),
-			ProjectUrl: os.Getenv("GRPC_PROJECT_URL"),
+			UserUrl:       os.Getenv("GRPC_USERS_URL"),
+			ProjectUrl:    os.Getenv("GRPC_PROJECT_URL"),
+			DatacenterUrl: os.Getenv("GRPC_DATACENTER_URL"),
 		},
+
+		// Redis: Redis{
+		// 	Addr:     os.Getenv("REDIS_ADDR"),
+		// 	DB:       redisDb,
+		// 	Password: os.Getenv("REDIS_PASSWORD"),
+		// },
 	}
 
 }

@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 name: retro-pgf-hub
 services:
 
@@ -13,5 +13,16 @@ services:
     volumes:
       - mongo_data:/var/lib/mongo/users
 
+  # redis:
+  #   image: redis:alpine3.19
+  #   container_name: redis
+  #   ports:
+  #     - 6379:6379
+  #   volumes:
+  #     - redis_data:/var/lib/redis
+  #     - ./redis.conf:/redis.conf
+  #   command: redis-server /redis.conf
+
 volumes:
   mongo_data:
+  redis_data:

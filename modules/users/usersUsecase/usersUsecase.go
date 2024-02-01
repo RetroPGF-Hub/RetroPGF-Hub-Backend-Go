@@ -2,6 +2,7 @@ package usersusecase
 
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
+	favPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite/favoritePb"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users"
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
 	usersrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersRepository"
@@ -19,6 +20,7 @@ type (
 		RegisterUserUsecase(cfg *config.Config, pctx context.Context, req *users.RegisterUserReq) (string, *users.UserProfileRes, error)
 		LoginUsecase(cfg *config.Config, pctx context.Context, email, password string) (string, *users.UserProfileRes, error)
 		FindUserByIdUsecase(pctx context.Context, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error)
+		GetUserFavs(pctx context.Context, cfg *config.Grpc, userId string) (*favPb.GetAllFavRes, error)
 	}
 
 	usersUsecase struct {
@@ -128,4 +130,13 @@ func (u *usersUsecase) LoginUsecase(cfg *config.Config, pctx context.Context, em
 			Id:        result.Id.Hex(),
 		},
 		nil
+}
+
+func (u *usersUsecase) GetUserFavs(pctx context.Context, cfg *config.Grpc, userId string) (*favPb.GetAllFavRes, error) {
+	projects, err := u.usersRepo.GetFavProjectByUserId(pctx, cfg.ProjectUrl, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return projects, nil
 }

@@ -18,6 +18,7 @@ type (
 		RegisterUser(c echo.Context) error
 		LoginUser(c echo.Context) error
 		LogOutUser(c echo.Context) error
+		GetUserFav(c echo.Context) error
 	}
 
 	usersHttpHandler struct {
@@ -131,6 +132,27 @@ func (h *usersHttpHandler) LogOutUser(c echo.Context) error {
 
 	return response.SuccessResponse(c, http.StatusOK, map[string]any{
 		"msg": "logout success",
+	})
+
+}
+
+func (h *usersHttpHandler) GetUserFav(c echo.Context) error {
+
+	ctx := context.Background()
+
+	userId := c.Get("user_id").(string)
+	if len(userId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
+	}
+
+	projects, err := h.usersUsecase.GetUserFavs(ctx, &h.cfg.Grpc, userId)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	return response.SuccessResponse(c, http.StatusOK, map[string]any{
+		"msg":  "ok",
+		"favs": projects,
 	})
 
 }

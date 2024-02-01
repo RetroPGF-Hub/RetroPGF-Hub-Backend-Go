@@ -33,7 +33,8 @@ type (
 		FavCount       int64     `json:"favCount"`
 		CommentCount   int64     `json:"commentCount"`
 		CreatedBy      string    `json:"createdBy"`
-		CreateAt       time.Time `json:"createdAt"`
+		FavOrNot       bool      `json:"favOrNot"`
+		CreatedAt      time.Time `json:"createdAt"`
 		UpdatedAt      time.Time `json:"updatedAt"`
 	}
 
@@ -50,6 +51,7 @@ type (
 		Contact        string               `json:"contact"`
 		FavCount       int64                `json:"favCount"`
 		CommentCount   int64                `json:"commentCount"`
+		FavOrNot       bool                 `json:"favOrNot"`
 		User           users.UserProfileRes `json:"user"`
 		CreateAt       time.Time            `json:"createdAt"`
 		UpdatedAt      time.Time            `json:"updatedAt"`

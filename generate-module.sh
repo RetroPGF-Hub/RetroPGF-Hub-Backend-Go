@@ -57,7 +57,7 @@ type (
 	}
 )
 
-func New${FIRST_CAPITALIZED_F}Repo(${FILENAME}Repo ${FILENAME}repository.${FIRST_CAPITALIZED_F}RepositoryService) ${FIRST_CAPITALIZED_F}UsecaseService {
+func New${FIRST_CAPITALIZED_F}Usecase(${FILENAME}Repo ${FILENAME}repository.${FIRST_CAPITALIZED_F}RepositoryService) ${FIRST_CAPITALIZED_F}UsecaseService {
 	return &${FILENAME}Usecase{
 		${FILENAME}Repo: ${FILENAME}Repo,
 	}
@@ -100,8 +100,8 @@ package server
 
 func (s *server) ${FILENAME}Service() {
 	${FILENAME}Repo := ${FILENAME}repository.New${FIRST_CAPITALIZED_F}Repository(s.db)
-	${FILENAME}Usecase := ${FILENAME}usecase.New${FIRST_CAPITALIZED_F}sUsecase(${FILENAME}Repo)
-	${FILENAME}HttpHandler := ${FILENAME}handler.New${FIRST_CAPITALIZED_F}sHttpHandler(s.cfg, ${FILENAME}Usecase)
+	${FILENAME}Usecase := ${FILENAME}usecase.New${FIRST_CAPITALIZED_F}Usecase(${FILENAME}Repo)
+	${FILENAME}HttpHandler := ${FILENAME}httphandler.New${FIRST_CAPITALIZED_F}HttpHandler(${FILENAME}Usecase)
 	
 	_ = ${FILENAME}HttpHandler
 }

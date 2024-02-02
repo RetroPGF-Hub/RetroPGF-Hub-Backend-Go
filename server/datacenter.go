@@ -16,6 +16,7 @@ func (s *server) datacenterService() {
 	datacenterHttpHandler := datacenterhttphandler.NewDatacenterHttpHandler(datacenterUsecase)
 
 	datacenterGrpc := datacenterhttphandler.NewdatacenterGrpcHandler(datacenterUsecase)
+
 	// Grpc client
 	go func() {
 		grpcServer, lis := grpcconn.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.DatacenterUrl)
@@ -24,5 +25,10 @@ func (s *server) datacenterService() {
 		log.Printf("datacenter grpc listening on %s", s.cfg.Grpc.DatacenterUrl)
 		grpcServer.Serve(lis)
 	}()
-	_ = datacenterHttpHandler
+
+	datacenters := s.app.Group("/datacenter_v1")
+	datacenters.GET("/get-url", datacenterHttpHandler.FindManyUrlCache)
+	datacenters.POST("/insert-url", datacenterHttpHandler.InsertUrlCache)
+	datacenters.DELETE("/delete-url/:urlId", datacenterHttpHandler.DeleteUrlCache)
+
 }

@@ -27,6 +27,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/redis/go-redis/v9"
+	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -37,6 +38,7 @@ type (
 		db         *mongo.Client
 		cfg        *config.Config
 		middleware middlewarehttphandler.MiddlewareHttpHandlerService
+		cron       *cron.Cron
 	}
 )
 
@@ -101,7 +103,13 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	case "users":
 		s.usersService()
 	case "datacenter":
+		s.cron = cron.New()
+
 		s.datacenterService()
+
+		s.cron.Start()
+		defer s.cron.Stop()
+
 	case "project":
 
 		projectRepo := projectrepository.NewProjectRepository(s.db)

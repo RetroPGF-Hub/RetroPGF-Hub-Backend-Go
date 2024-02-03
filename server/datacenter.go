@@ -5,8 +5,10 @@ import (
 	datacenterPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterPb"
 	datacenterrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterRepository"
 	datacenterusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterUsecase"
+	"fmt"
 
 	grpcconn "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/grpcConn"
+
 	"log"
 )
 
@@ -30,5 +32,9 @@ func (s *server) datacenterService() {
 	datacenters.GET("/get-url", datacenterHttpHandler.FindManyUrlCache)
 	datacenters.POST("/insert-url", datacenterHttpHandler.InsertUrlCache)
 	datacenters.DELETE("/delete-url/:urlId", datacenterHttpHandler.DeleteUrlCache)
+
+	s.cron.AddFunc("@every 4s", func() {
+		fmt.Println("Function running every 4 seconds")
+	})
 
 }

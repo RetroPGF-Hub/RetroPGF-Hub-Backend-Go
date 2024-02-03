@@ -30,9 +30,10 @@ func (s *server) datacenterService() {
 	datacenters := s.app.Group("/datacenter_v1")
 	datacenters.GET("/get-url", datacenterHttpHandler.FindManyUrlCache)
 	datacenters.GET("/get-cache/:cacheId", datacenterHttpHandler.FindCacheData)
+	datacenters.PATCH("/trigger-update-cache/:cacheId", datacenterHttpHandler.TriggerUpdateCache)
+
 	datacenters.POST("/insert-url", datacenterHttpHandler.InsertUrlCache)
 	datacenters.DELETE("/delete-url/:urlId", datacenterHttpHandler.DeleteUrlCache)
-
 	s.cron.AddFunc("@every 30s", func() {
 		if err := datacenterHttpHandler.CronJobUpdateCache(); err != nil {
 			log.Printf("error something wrong %+v", err)

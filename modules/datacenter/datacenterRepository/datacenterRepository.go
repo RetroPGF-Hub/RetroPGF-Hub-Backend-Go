@@ -26,6 +26,7 @@ type (
 		GetCacheFromRedis(pctx context.Context, key string) (string, error)
 		DeleteCacheFromRedis(pctx context.Context, key string) error
 		InsertManyCacheToRedis(pctx context.Context, pipeData []*datacenter.PipeLineCache) error
+		FindOneCache(pctx context.Context, cacheId primitive.ObjectID) (*datacenter.CacheModel, error)
 	}
 
 	datacenterRepository struct {
@@ -102,6 +103,23 @@ func (r *datacenterRepository) InsertUrlCache(pctx context.Context, req *datacen
 	}
 
 	return cacheId.InsertedID.(primitive.ObjectID), nil
+}
+
+func (r *datacenterRepository) FindOneCache(pctx context.Context, cacheId primitive.ObjectID) (*datacenter.CacheModel, error) {
+	ctx, cancel := context.WithTimeout(pctx, 15*time.Second)
+	defer cancel()
+	db := r.cacheDbConn(ctx)
+	col := db.Collection("cache_db")
+
+	data := new(datacenter.CacheModel)
+
+	err := col.FindOne(ctx, bson.M{"_id": cacheId}).Decode(&data)
+	if err != nil {
+		log.Printf("Error: FindOneCache: %s", err.Error())
+		return nil, errors.New("error: find one cache repo fail")
+	}
+
+	return data, nil
 }
 
 func (r *datacenterRepository) GetAllUrlCache(pctx context.Context) ([]*datacenter.CacheModel, error) {

@@ -10,7 +10,7 @@ import (
 func (r *datacenterRepository) InsertCacheToRedis(pctx context.Context, key string, data string) error {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
-	// Zero expiration means the key has no expiration time.
+	// Zero expiration means the key has no expiration time
 	if err := r.redis.Set(ctx, key, data, 0).Err(); err != nil {
 		return errors.New("error: insert cache to redis failed" + err.Error())
 	}
@@ -27,7 +27,7 @@ func (r *datacenterRepository) InsertManyCacheToRedis(pctx context.Context, pipe
 		pipeLine.Set(pctx, v.CacheId, v.CacheData, 0)
 	}
 
-	// Zero expiration means the key has no expiration time.
+	// Zero expiration means the key has no expiration time
 	_, err := pipeLine.Exec(ctx)
 	if err != nil {
 		return err

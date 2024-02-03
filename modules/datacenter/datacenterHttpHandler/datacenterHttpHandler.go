@@ -18,6 +18,7 @@ type (
 		FindManyUrlCache(c echo.Context) error
 		FindCacheData(c echo.Context) error
 		CronJobUpdateCache() error
+		TriggerUpdateCache(c echo.Context) error
 	}
 
 	datacenterHttpHandler struct {
@@ -79,7 +80,7 @@ func (h *datacenterHttpHandler) FindManyUrlCache(c echo.Context) error {
 	}
 
 	return response.SuccessResponse(c, http.StatusOK, map[string]any{
-		"msg":  "delete url success",
+		"msg":  "ok",
 		"urls": data,
 	})
 
@@ -93,6 +94,23 @@ func (h *datacenterHttpHandler) FindCacheData(c echo.Context) error {
 	}
 
 	data, err := h.datacenterUsecase.FindCacheData(ctx, cacheId)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+	return response.SuccessResponse(c, http.StatusOK, map[string]any{
+		"msg":       "ok",
+		"cacheData": data,
+	})
+}
+
+func (h *datacenterHttpHandler) TriggerUpdateCache(c echo.Context) error {
+	ctx := context.Background()
+	cacheId := c.Param("cacheId")
+	if len(cacheId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "cacheId is required")
+	}
+
+	data, err := h.datacenterUsecase.TriggerUpdateCache(ctx, cacheId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}

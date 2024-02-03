@@ -26,6 +26,7 @@ type (
 		FindManyUrlsCache(pctx context.Context) ([]*datacenter.CacheModel, error)
 		FindCacheData(pctx context.Context, cacheId string) (*any, error)
 		CronJobUpdateCache(pctx context.Context) error
+		TriggerUpdateCache(pctx context.Context, cacheId string) (*any, error)
 	}
 
 	datacenterUsecase struct {
@@ -97,13 +98,7 @@ func (u *datacenterUsecase) InsertUrlCache(pctx context.Context, url string) (st
 		return "", err
 	}
 
-	response, err := http.Get(url)
-	if err != nil {
-		return "", err
-	}
-	defer response.Body.Close()
-
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := getReq(url)
 	if err != nil {
 		return "", err
 	}
@@ -149,10 +144,32 @@ func (u *datacenterUsecase) FindCacheData(pctx context.Context, cacheId string) 
 	if err != nil {
 		return temp, err
 	}
-
 	return temp, err
 
 }
+
+func (u *datacenterUsecase) TriggerUpdateCache(pctx context.Context, cacheId string) (*any, error) {
+	rawD, err := u.datacenterRepo.FindOneCache(pctx, utils.ConvertToObjectId(cacheId))
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := getReq(rawD.Url)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := u.datacenterRepo.InsertCacheToRedis(pctx, rawD.UrlId.Hex(), string(body)); err != nil {
+		return nil, errors.New("failed to insert cache to redis")
+	}
+	result := new(any)
+	if err = json.Unmarshal(body, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func (u *datacenterUsecase) CronJobUpdateCache(pctx context.Context) error {
 	data, err := u.datacenterRepo.GetAllUrlCache(pctx)
 	if err != nil {
@@ -162,17 +179,10 @@ func (u *datacenterUsecase) CronJobUpdateCache(pctx context.Context) error {
 	pipeLineData := make([]*datacenter.PipeLineCache, 0)
 
 	for _, v := range data {
-		response, err := http.Get(v.Url)
+		body, err := getReq(v.Url)
 		if err != nil {
 			return err
 		}
-		defer response.Body.Close()
-
-		body, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			return err
-		}
-
 		pipeLineData = append(pipeLineData, &datacenter.PipeLineCache{
 			CacheId:   v.UrlId.Hex(),
 			CacheData: string(body),
@@ -191,4 +201,19 @@ func (u *datacenterUsecase) CronJobUpdateCache(pctx context.Context) error {
 	}
 
 	return nil
+}
+
+func getReq(url string) ([]byte, error) {
+	response, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
 }

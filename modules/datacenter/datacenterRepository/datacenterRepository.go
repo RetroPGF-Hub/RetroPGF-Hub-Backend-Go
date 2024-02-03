@@ -8,6 +8,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,16 +22,22 @@ type (
 		InsertUrlCache(pctx context.Context, req *datacenter.CacheModel) (primitive.ObjectID, error)
 		DeleteUrlCache(pctx context.Context, urlId primitive.ObjectID) error
 		GetAllUrlCache(pctx context.Context) ([]*datacenter.CacheModel, error)
+		InsertCacheToRedis(pctx context.Context, key string, data string) error
+		GetCacheFromRedis(pctx context.Context, key string) (string, error)
+		DeleteCacheFromRedis(pctx context.Context, key string) error
+		InsertManyCacheToRedis(pctx context.Context, pipeData []*datacenter.PipeLineCache) error
 	}
 
 	datacenterRepository struct {
-		db *mongo.Client
+		db    *mongo.Client
+		redis *redis.Client
 	}
 )
 
-func NewDatacenterRepository(db *mongo.Client) DatacenterRepositoryService {
+func NewDatacenterRepository(db *mongo.Client, redis *redis.Client) DatacenterRepositoryService {
 	return &datacenterRepository{
-		db: db,
+		db:    db,
+		redis: redis,
 	}
 }
 
@@ -44,7 +51,7 @@ func (r *datacenterRepository) cacheDbConn(pctx context.Context) *mongo.Database
 
 func (r *datacenterRepository) GetAllProjectRepo(pctx context.Context, limit, skip int64) ([]*project.ProjectModel, error) {
 
-	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(pctx, 15*time.Second)
 	defer cancel()
 	db := r.projectDbConn(ctx)
 	col := db.Collection("projects")
@@ -68,7 +75,7 @@ func (r *datacenterRepository) GetAllProjectRepo(pctx context.Context, limit, sk
 
 func (r *datacenterRepository) GetSingleProjectRepo(pctx context.Context, projectId primitive.ObjectID) (*project.ProjectModel, error) {
 
-	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(pctx, 15*time.Second)
 	defer cancel()
 	db := r.projectDbConn(ctx)
 	col := db.Collection("projects")
@@ -83,7 +90,7 @@ func (r *datacenterRepository) GetSingleProjectRepo(pctx context.Context, projec
 }
 
 func (r *datacenterRepository) InsertUrlCache(pctx context.Context, req *datacenter.CacheModel) (primitive.ObjectID, error) {
-	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(pctx, 15*time.Second)
 	defer cancel()
 	db := r.cacheDbConn(ctx)
 	col := db.Collection("cache_db")
@@ -99,7 +106,7 @@ func (r *datacenterRepository) InsertUrlCache(pctx context.Context, req *datacen
 
 func (r *datacenterRepository) GetAllUrlCache(pctx context.Context) ([]*datacenter.CacheModel, error) {
 
-	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(pctx, 15*time.Second)
 	defer cancel()
 	db := r.cacheDbConn(ctx)
 	col := db.Collection("cache_db")
@@ -123,7 +130,7 @@ func (r *datacenterRepository) GetAllUrlCache(pctx context.Context) ([]*datacent
 
 func (r *datacenterRepository) DeleteUrlCache(pctx context.Context, urlId primitive.ObjectID) error {
 
-	ctx, cancel := context.WithTimeout(pctx, 30*time.Second)
+	ctx, cancel := context.WithTimeout(pctx, 15*time.Second)
 	defer cancel()
 	db := r.cacheDbConn(ctx)
 	col := db.Collection("cache_db")

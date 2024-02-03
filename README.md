@@ -1,3 +1,10 @@
+## Random api
+https://api.thecatapi.com/v1/images/search?limit=10
+
+## Exec Redis cli
+docker exec -it e71e74235ca1 redis-cli
+
+
 ## Export path
 export PATH="$PATH:$(go env GOPATH)/bin"
 

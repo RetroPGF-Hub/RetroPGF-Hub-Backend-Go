@@ -13,4 +13,9 @@ type (
 		CreateAt  time.Time          `bson:"created_at" json:"createdAt"`
 		UpdatedAt time.Time          `bson:"updated_at" json:"ureatedAt"`
 	}
+
+	PipeLineCache struct {
+		CacheId   string
+		CacheData string
+	}
 )

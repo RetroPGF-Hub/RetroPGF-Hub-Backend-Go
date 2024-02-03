@@ -13,12 +13,11 @@ import (
 )
 
 func (s *server) datacenterService() {
-	datacenterRepo := datacenterrepository.NewDatacenterRepository(s.db)
+	datacenterRepo := datacenterrepository.NewDatacenterRepository(s.db, s.redis)
 	datacenterUsecase := datacenterusecase.NewDatacenterUsecase(datacenterRepo, &s.cfg.Grpc)
 	datacenterHttpHandler := datacenterhttphandler.NewDatacenterHttpHandler(datacenterUsecase)
 
 	datacenterGrpc := datacenterhttphandler.NewdatacenterGrpcHandler(datacenterUsecase)
-
 	// Grpc client
 	go func() {
 		grpcServer, lis := grpcconn.NewGrpcServer(&s.cfg.Jwt, s.cfg.Grpc.DatacenterUrl)
@@ -30,11 +29,15 @@ func (s *server) datacenterService() {
 
 	datacenters := s.app.Group("/datacenter_v1")
 	datacenters.GET("/get-url", datacenterHttpHandler.FindManyUrlCache)
+	datacenters.GET("/get-cache/:cacheId", datacenterHttpHandler.FindCacheData)
 	datacenters.POST("/insert-url", datacenterHttpHandler.InsertUrlCache)
 	datacenters.DELETE("/delete-url/:urlId", datacenterHttpHandler.DeleteUrlCache)
 
-	s.cron.AddFunc("@every 4s", func() {
-		fmt.Println("Function running every 4 seconds")
+	s.cron.AddFunc("@every 30s", func() {
+		if err := datacenterHttpHandler.CronJobUpdateCache(); err != nil {
+			log.Printf("error something wrong %+v", err)
+		}
+		fmt.Println("Function running every 30 seconds")
 	})
 
 }

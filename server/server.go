@@ -16,6 +16,7 @@ import (
 	projectusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project/projectUsecase"
 	grpcconn "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/grpcConn"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/jwtauth"
+	redisactor "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/redisActor"
 	"context"
 	"log"
 	"net/http"
@@ -103,7 +104,9 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 	case "users":
 		s.usersService()
 	case "datacenter":
+
 		s.cron = cron.New()
+		s.redis = redisactor.RedisConn(&cfg.Redis)
 
 		s.datacenterService()
 

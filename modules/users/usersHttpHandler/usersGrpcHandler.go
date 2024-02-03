@@ -20,3 +20,7 @@ func NewusersGrpcHandler(usersUsecase usersusecase.UsersUsecaseService) *usersGr
 func (g *usersGrpcHandler) GetUserInfoById(ctx context.Context, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error) {
 	return g.usersUsecase.FindUserByIdUsecase(ctx, req)
 }
+
+func (g *usersGrpcHandler) GetManyUserInfoForProject(ctx context.Context, req *usersPb.GetManyUserInfoForProjectReq) (*usersPb.GetManyUserInfoForProjectRes, error) {
+	return g.usersUsecase.FindManyUserIdUsecase(ctx, req)
+}

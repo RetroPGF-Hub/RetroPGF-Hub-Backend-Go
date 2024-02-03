@@ -21,6 +21,7 @@ type (
 		LoginUsecase(cfg *config.Config, pctx context.Context, email, password string) (string, *users.UserProfileRes, error)
 		FindUserByIdUsecase(pctx context.Context, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error)
 		GetUserFavs(pctx context.Context, cfg *config.Grpc, userId string) (*favPb.GetAllFavRes, error)
+		FindManyUserIdUsecase(pctx context.Context, req *usersPb.GetManyUserInfoForProjectReq) (*usersPb.GetManyUserInfoForProjectRes, error)
 	}
 
 	usersUsecase struct {
@@ -139,4 +140,36 @@ func (u *usersUsecase) GetUserFavs(pctx context.Context, cfg *config.Grpc, userI
 	}
 
 	return projects, nil
+}
+
+func (u *usersUsecase) FindManyUserIdUsecase(pctx context.Context, req *usersPb.GetManyUserInfoForProjectReq) (*usersPb.GetManyUserInfoForProjectRes, error) {
+
+	objectsId := make([]primitive.ObjectID, 0)
+
+	for _, v := range req.UsersId {
+		objectsId = append(objectsId, (utils.ConvertToObjectId(v)))
+	}
+
+	users, err := u.usersRepo.FindManyUserId(pctx, objectsId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	usersRes := make([]*usersPb.UserProfile, 0)
+	for _, v := range users {
+		usersRes = append(usersRes, &usersPb.UserProfile{
+			UserId:    v.Id.Hex(),
+			Email:     v.Email,
+			Source:    v.Source,
+			Profile:   v.Profile,
+			UserName:  v.Username,
+			FirstName: v.Firstname,
+			LastName:  v.Lastname,
+		})
+	}
+
+	return &usersPb.GetManyUserInfoForProjectRes{
+		UsersProfile: usersRes,
+	}, nil
 }

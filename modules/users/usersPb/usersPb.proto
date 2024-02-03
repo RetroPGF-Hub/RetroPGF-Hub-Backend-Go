@@ -19,9 +19,28 @@ message GetUserInfoRes {
 }
 
 
+message GetManyUserInfoForProjectReq {
+    repeated string usersId = 1;
+}
+
+message GetManyUserInfoForProjectRes {
+    repeated UserProfile usersProfile = 1;
+}
+
+message UserProfile {
+    string userId = 1;
+    string email = 2;
+    string source = 3;
+    string profile = 4;
+    string user_name = 5;
+    string first_name = 6;
+    string last_name = 7;
+}
 // Method
 service UsersGrpcService {
     rpc GetUserInfoById(GetUserInfoReq) returns (GetUserInfoRes);
+    rpc GetManyUserInfoForProject(GetManyUserInfoForProjectReq) returns (GetManyUserInfoForProjectRes);
 }
+
 
 

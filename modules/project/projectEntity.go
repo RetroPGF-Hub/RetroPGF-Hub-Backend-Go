@@ -1,6 +1,7 @@
 package project
 
 import (
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users"
 	"time"
 )
@@ -52,8 +53,28 @@ type (
 		FavCount       int64                `json:"favCount"`
 		CommentCount   int64                `json:"commentCount"`
 		FavOrNot       bool                 `json:"favOrNot"`
-		User           users.UserProfileRes `json:"user"`
+		Owner          users.UserProfileRes `json:"owner"`
 		CreateAt       time.Time            `json:"createdAt"`
 		UpdatedAt      time.Time            `json:"updatedAt"`
+	}
+
+	FullProjectRes struct {
+		Id             string                        `json:"_id,omitempty"`
+		Name           string                        `json:"name"`
+		LogoUrl        string                        `json:"logoUrl"`
+		BannerUrl      string                        `json:"bannerUrl"`
+		WebsiteUrl     string                        `json:"websiteUrl"`
+		CryptoCategory string                        `json:"cryptoCategory"`
+		Description    string                        `json:"description"`
+		Reason         string                        `json:"reason"`
+		Category       string                        `json:"category"`
+		Contact        string                        `json:"contact"`
+		FavCount       int64                         `json:"favCount"`
+		CommentCount   int64                         `json:"commentCount"`
+		FavOrNot       bool                          `json:"favOrNot"`
+		Owner          users.UserProfileRes          `json:"owner"`
+		Comment        []comment.CommentAResWithUser `json:"comment"`
+		CreateAt       time.Time                     `json:"createdAt"`
+		UpdatedAt      time.Time                     `json:"updatedAt"`
 	}
 )

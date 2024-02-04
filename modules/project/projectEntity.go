@@ -54,7 +54,7 @@ type (
 		CommentCount   int64                `json:"commentCount"`
 		FavOrNot       bool                 `json:"favOrNot"`
 		Owner          users.UserProfileRes `json:"owner"`
-		CreateAt       time.Time            `json:"createdAt"`
+		CreatedAt      time.Time            `json:"createdAt"`
 		UpdatedAt      time.Time            `json:"updatedAt"`
 	}
 

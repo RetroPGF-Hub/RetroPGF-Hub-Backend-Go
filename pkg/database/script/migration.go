@@ -2,6 +2,7 @@ package main
 
 import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/database/migration"
 	"context"
 	"log"
 	"os"
@@ -19,17 +20,12 @@ func main() {
 	}())
 
 	switch cfg.App.Name {
-	// case "auth":
-	// 	migration.AuthMigrate(ctx, &cfg)
-	// case "player":
-	// 	migration.PlayerMigrate(ctx, &cfg)
-
-	// case "item":
-	// 	migration.ItemMigrate(ctx, &cfg)
-	// case "inventory":
-	// 	migration.InventoryMigrate(ctx, &cfg)
-	// case "payment":
-	// 	migration.PaymentMigrate(ctx, &cfg)
+	case "project":
+		// migration.Commentigrate(ctx, &cfg)
+		// migration.FavMigrate(ctx, &cfg)
+		migration.ProjectMigrate(ctx, &cfg)
+	case "users":
+		migration.UsersMigrate(ctx, &cfg)
 
 	}
 

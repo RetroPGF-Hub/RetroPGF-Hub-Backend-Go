@@ -5,7 +5,6 @@ import (
 	datacenterPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterPb"
 	datacenterrepository "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterRepository"
 	datacenterusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterUsecase"
-	"fmt"
 
 	grpcconn "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/grpcConn"
 
@@ -34,11 +33,11 @@ func (s *server) datacenterService() {
 
 	datacenters.POST("/insert-url", datacenterHttpHandler.InsertUrlCache)
 	datacenters.DELETE("/delete-url/:urlId", datacenterHttpHandler.DeleteUrlCache)
-	s.cron.AddFunc("@every 30s", func() {
-		if err := datacenterHttpHandler.CronJobUpdateCache(); err != nil {
-			log.Printf("error something wrong %+v", err)
-		}
-		fmt.Println("Function running every 30 seconds")
-	})
+	// s.cron.AddFunc("@every 30s", func() {
+	// 	if err := datacenterHttpHandler.CronJobUpdateCache(); err != nil {
+	// 		log.Printf("error something wrong %+v", err)
+	// 	}
+	// 	fmt.Println("Function running every 30 seconds")
+	// })
 
 }

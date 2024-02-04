@@ -138,7 +138,7 @@ func (h *projectHttpHandler) UpdateOneProjectHttp(c echo.Context) error {
 
 func (h *projectHttpHandler) FindAllProeject(c echo.Context) error {
 	ctx := context.Background()
-	var limit, skip int = 20, 0
+	var limit, skip int = 40, 0
 
 	limitStr := c.QueryParam("limit")
 	skipStr := c.QueryParam("skip")

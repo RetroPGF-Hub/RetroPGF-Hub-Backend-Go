@@ -20,7 +20,7 @@ db-stop:
 migrate-project:
 	go run ./pkg/database/script/migration.go ./env/.env.project
 	
-migrate-user:
+migrate-users:
 	go run ./pkg/database/script/migration.go ./env/.env.users
 	
 	

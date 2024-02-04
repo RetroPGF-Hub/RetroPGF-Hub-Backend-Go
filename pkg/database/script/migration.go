@@ -21,12 +21,11 @@ func main() {
 
 	switch cfg.App.Name {
 	case "project":
-		// migration.Commentigrate(ctx, &cfg)
-		// migration.FavMigrate(ctx, &cfg)
+		migration.Commentigrate(ctx, &cfg)
+		migration.FavMigrate(ctx, &cfg)
 		migration.ProjectMigrate(ctx, &cfg)
 	case "users":
 		migration.UsersMigrate(ctx, &cfg)
-
 	}
 
 }

@@ -1,26 +1,89 @@
+## Documentation for this project
+https://documenter.getpostman.com/view/17633056/2s9Yyth1cP
+
+## Flow 
+### Project Service
+![alt text](./assets/projectSvc.png)
+### User and Datacenter Service
+![alt text](./assets/user&dcSvc.png)
+
+
+## Run Service
+### Service Users
+```
+make users
+```
+
+### Service Project
+```
+make project
+```
+
+### Service Datacenter
+```
+make datacenter
+```
+
+## Start Database
+### This command will run Mongo and Redis container
+```
+make db-up
+```
+## Stop Database
+```
+make db-stop
+```
+
+## Grpc
+### Export path
+```
+export PATH="$PATH:$(go env GOPATH)/bin"
+```
+
+## Migrate Grpc
+### Migrate Grpc Users
+```
+make grpc-users
+```
+
+### Migrate Grpc Datacenter
+```
+make grpc-datacenter
+```
+
+### Migrate Grpc Favorite
+```
+make grpc-fav
+```
+
+
+## Migrate Database (Create Index)
+### Migrate Project
+```
+make migrate-project
+```
+
+### Migrate Users
+```
+make migrate-users
+```
+
+
 ## Random api
 https://api.thecatapi.com/v1/images/search?limit=10
 
 ## Exec Redis cli
-docker exec -it e71e74235ca1 redis-cli
+docker exec -it containerId redis-cli
 
 
-## Export path
-export PATH="$PATH:$(go env GOPATH)/bin"
-
+## Generate Secret
+```
 openssl genrsa -out cert/key_rsa 1024
 openssl rsa -in cert/key_rsa -pubout -out cert/key_rsa.pub
-
-## GRPC
-### Export path
-export PATH="$PATH:$(go env GOPATH)/bin"
-```
-protoc --go_out=. --go_opt=paths=source_relative \
-    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    modules/users/usersPb/usersPb.proto
 ```
 
-## db diagram
+
+## Database Model
 
 ```
 Table users {
@@ -37,7 +100,7 @@ Table users {
 
 Table projects {
   // object id
-  id              String   [primary key]
+  _id              String   [primary key]
   name            String
   logo_url        String
   banner_url      String
@@ -47,37 +110,34 @@ Table projects {
   reason          String   
   category        String
   contact         String
-  // objectid
+  fav_count       Number
+  comment_count   Number
   create_by       String
   created_at      timestamp
   updated_at      timestamp
 }
 
 Table comment {
-  id         String
-  title      String
-  content    String
-  // objectid
-  user_id    String
-  project_id String
-
+  // _id is equal to projectId
+  _id         String
+  comments {
+    _id             String
+    title           String
+    content         String
+    created_by      String
+    created_at      timestamp
+    updated_at      timestamp
+  }[]
   created_at      timestamp
   updated_at      timestamp
 }
 
-Table favourite {
+Table favorite {
+  // _id is equal of userId
+  _id  String
   project_id String[]
-  // users is a array of user
-  users String[]
   created_at      timestamp
 }
-
-
-
-Ref: comment.user_id > users.id
-Ref: comment.project_id > projects.id
-Ref: favourite.user_id > users.id
-Ref: favourite.project_id > projects.id
 
 ```
 

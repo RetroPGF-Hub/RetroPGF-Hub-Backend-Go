@@ -34,7 +34,7 @@ func (s *server) datacenterService() {
 
 	datacenters.POST("/insert-url", datacenterHttpHandler.InsertUrlCache)
 	datacenters.DELETE("/delete-url/:urlId", datacenterHttpHandler.DeleteUrlCache)
-	s.cron.AddFunc("@every 30s", func() {
+	s.cron.AddFunc("@every 1h", func() {
 		if err := datacenterHttpHandler.CronJobUpdateCache(); err != nil {
 			log.Printf("error something wrong %+v", err)
 		}

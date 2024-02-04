@@ -6,8 +6,10 @@ import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/favorite"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/project"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
 	"context"
+	"sync"
 
 	datacenterPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterPb"
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
@@ -21,7 +23,7 @@ type (
 		FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.FullProjectRes, error)
 		UpdateOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string, req *project.InsertProjectReq) (*project.ProjectResWithUser, error)
 		DeleteOneProjectUsecase(pctx context.Context, projectId, userId string) error
-		FindAllProjectDatacenterUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip int64, userId string) ([]*project.ProjectRes, error)
+		FindAllProjectDatacenterUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip int64, userId string) ([]*project.ProjectResWithUser, error)
 	}
 
 	projectUsecase struct {
@@ -175,7 +177,8 @@ func (u *projectUsecase) DeleteOneProjectUsecase(pctx context.Context, projectId
 
 	return nil
 }
-func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip int64, userId string) ([]*project.ProjectRes, error) {
+
+func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip int64, userId string) ([]*project.ProjectResWithUser, error) {
 	rawProjects, err := u.pActor.ProjectRepo.FindAllProjectDatacenter(pctx, grpcCfg.DatacenterUrl, &datacenterPb.GetProjectDataCenterReq{
 		Limit: limit,
 		Skip:  skip,
@@ -184,7 +187,15 @@ func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, g
 		return nil, err
 	}
 
-	var projectRes []*project.ProjectRes
+	usersId := u.accumateUserIdByProjects(rawProjects)
+	usersInfo, err := u.pActor.ProjectRepo.FindManyUserInfo(pctx, grpcCfg.UserUrl, &usersPb.GetManyUserInfoForProjectReq{UsersId: usersId})
+	if err != nil {
+		return nil, err
+	}
+
+	var projectRes []*project.ProjectResWithUser
+
+	// authen user
 	if len(userId) > 5 {
 
 		rawFav, err := u.pActor.FavoriteRepo.GetAllProjectInUser(pctx, utils.ConvertToObjectId(userId))
@@ -194,23 +205,62 @@ func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, g
 
 		for _, p := range rawProjects.Projects {
 			parsedTime := utils.ConvertStringTimeToTime(p.CreatedAt)
+			var wg sync.WaitGroup
 			var match bool
+
+			owner := new(users.UserProfileRes)
+			wg.Add(len(usersInfo.UsersProfile))
+			for _, v := range usersInfo.UsersProfile {
+				go func(v *usersPb.UserProfile) {
+					defer wg.Done()
+					if v.UserId == p.CreatedBy {
+						owner.Id = v.UserId
+						owner.Email = v.Email
+						owner.Firstname = v.FirstName
+						owner.Lastname = v.LastName
+						owner.Username = v.UserName
+						owner.Profile = v.Profile
+					}
+				}(v)
+			}
+			wg.Wait()
+
 			for _, fp := range rawFav.ProjectId {
 				if p.Id == fp {
-					projectRes = append(projectRes, u.assignProjectRes(p, true, parsedTime))
+					projectRes = append(projectRes, u.assignProjectRes(p, true, parsedTime, owner))
 					match = true
 					break
 				}
 			}
 			if !match {
-				projectRes = append(projectRes, u.assignProjectRes(p, false, parsedTime))
+				projectRes = append(projectRes, u.assignProjectRes(p, false, parsedTime, owner))
 			}
 		}
 
+		// unauthen user no check fav
 	} else {
+		var wg sync.WaitGroup
 		for _, p := range rawProjects.Projects {
+
+			owner := new(users.UserProfileRes)
+			wg.Add(len(usersInfo.UsersProfile))
+			for _, v := range usersInfo.UsersProfile {
+				go func(v *usersPb.UserProfile) {
+					defer wg.Done()
+					if v.UserId == p.CreatedBy {
+						owner.Id = v.UserId
+						owner.Email = v.Email
+						owner.Firstname = v.FirstName
+						owner.Lastname = v.LastName
+						owner.Username = v.UserName
+						owner.Profile = v.Profile
+					}
+				}(v)
+			}
+			wg.Wait()
+
 			parsedTime := utils.ConvertStringTimeToTime(p.CreatedAt)
-			projectRes = append(projectRes, u.assignProjectRes(p, false, parsedTime))
+			projectRes = append(projectRes, u.assignProjectRes(p, false, parsedTime, owner))
 		}
 	}
 
@@ -230,6 +280,7 @@ func (u *projectUsecase) FindOneProjectUsecase(pctx context.Context, grpcCfg *co
 	}
 
 	usersId := u.accumateUserId(rawComment)
+	// add the owner of the project to get the info of owner
 	usersId = append(usersId, projectD.Projects.CreatedBy)
 
 	usersInfo, err := u.pActor.ProjectRepo.FindManyUserInfo(pctx, grpcCfg.UserUrl, &usersPb.GetManyUserInfoForProjectReq{UsersId: usersId})

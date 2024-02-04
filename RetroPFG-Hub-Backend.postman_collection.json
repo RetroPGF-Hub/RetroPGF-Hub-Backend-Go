@@ -1,0 +1,2639 @@
+{
+	"info": {
+		"_postman_id": "eaa3d8a6-cb3e-4db8-aed1-f46109de6a07",
+		"name": "RetroPFG-Hub-Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "17633056"
+	},
+	"item": [
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"mix@example.com\",\n\t\"profile\": \"user\",\n\t\"password\": \"securepassword\",\n\t\"username\": \"john_doe\",\n\t\"firstname\": \"John\",\n\t\"lastname\": \"Doe\",\n\t\"source\": \"web\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{usersurl}}/register",
+							"host": [
+								"{{usersurl}}"
+							],
+							"path": [
+								"register"
+							]
+						},
+						"description": "There will be 2 cookies set in the response automatically.\n\n1. accessCheck is for checking that cookie is exist or not\n2. accessToken is for server read the value only"
+					},
+					"response": [
+						{
+							"name": "201-create-success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"email\": \"mix@example.com\",\n\t\"profile\": \"user\",\n\t\"password\": \"securepassword\",\n\t\"username\": \"john_doe\",\n\t\"firstname\": \"John\",\n\t\"lastname\": \"Doe\",\n\t\"source\": \"web\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/users_v1/register",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"users_v1",
+										"register"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "accessToken=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjI2MTg1MywibmJmIjoxNzA2MTc1NDUzLCJpYXQiOjE3MDYxNzU0NTN9.uXplBOYYlLLLX7JZfojwoYLYduSgWL8aNbthYwTM2Dh4aM_0TPQljffQxb0YSiYU_RGvshuU-NDKQRznRb_gXXYOdGQgP9hPZsW31zvAIx7jmi_Waosm6-XuRNdSznDvw3mIl93f7r79vexcz74XIOecA-nOsTK5UM7glEvVTrk; Expires=Thu, 01 Feb 2024 09:37:33 GMT; HttpOnly; Secure"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "accessChecker=65b22bdd9d60025ed5a82781; Expires=Thu, 01 Feb 2024 09:37:33 GMT"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 09:37:33 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "159"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"ok\",\n    \"user\": {\n        \"userId\": \"65b22bdd9d60025ed5a82781\",\n        \"email\": \"mix@example.com\",\n        \"profile\": \"user\",\n        \"username\": \"john_doe\",\n        \"firstname\": \"John\",\n        \"lastname\": \"Doe\"\n    }\n}"
+						},
+						{
+							"name": "400-duplicate-email",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"email\": \"mix@example.com\",\n\t\"profile\": \"user\",\n\t\"password\": \"securepassword\",\n\t\"username\": \"john_doe\",\n\t\"firstname\": \"John\",\n\t\"lastname\": \"Doe\",\n\t\"source\": \"web\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{usersurl}}/register",
+									"host": [
+										"{{usersurl}}"
+									],
+									"path": [
+										"register"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 09:37:43 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "61"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"email is already exist, try to use different email\"\n}"
+						},
+						{
+							"name": "400-some-field-required",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"email\": \"mix@example.com\",\n\t\"profile\": \"user\",\n\t\"password\": \"securepassword\",\n\t\"username\": \"john_doe\",\n\t\"firstname\": \"John\",\n\t\"lastname\": \"Doe\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{usersurl}}/register",
+									"host": [
+										"{{usersurl}}"
+									],
+									"path": [
+										"register"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 09:40:32 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "225"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: bind data failed: code=400, message=Syntax error: offset=150, error=invalid character '}' looking for beginning of object key string, internal=invalid character '}' looking for beginning of object key string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\": \"mix13@gmail.com\",\n\t\"password\": \"123\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{usersurl}}/login",
+							"host": [
+								"{{usersurl}}"
+							],
+							"path": [
+								"login"
+							]
+						},
+						"description": "There will be 2 cookies set in the response automatically.\n\n1. accessCheck is for checking that cookie is exist or not\n    \n2. accessToken is for server read the value only"
+					},
+					"response": [
+						{
+							"name": "200-login-success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"email\": \"mix@example.com\",\n\t\"password\": \"securepassword\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5000/users_v1/login",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"users_v1",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "accessToken=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjI2MjIwNSwibmJmIjoxNzA2MTc1ODA1LCJpYXQiOjE3MDYxNzU4MDV9.pX0agTSOyXfI0Cm08YJAwhIIrFTzohNaJgvoP9-LmDb8_5stt7qVIlF0rZjg6e9wLfJUX9g3MDqPWliuqAN2xzAkjUlfg9mwPmCk_pRtpE30MJbLpygP20BFjXh5Y7D5_8UtqxLX_7AoCuj1yKkwZuAuf0gjvvMWE-DRTWPfKs0; Expires=Thu, 01 Feb 2024 09:43:25 GMT; HttpOnly; Secure"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "accessChecker=65b22bdd9d60025ed5a82781; Expires=Thu, 01 Feb 2024 09:43:25 GMT"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 09:43:25 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "159"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"ok\",\n    \"user\": {\n        \"userId\": \"65b22bdd9d60025ed5a82781\",\n        \"email\": \"mix@example.com\",\n        \"profile\": \"user\",\n        \"username\": \"john_doe\",\n        \"firstname\": \"John\",\n        \"lastname\": \"Doe\"\n    }\n}"
+						},
+						{
+							"name": "400-wrong-password",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"email\": \"mix@example.com\",\n\t\"password\": \"securepassword123\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{usersurl}}/login",
+									"host": [
+										"{{usersurl}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 09:39:56 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "34"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: password invalid\"\n}"
+						},
+						{
+							"name": "400-some-field-required",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"email\": \"mix@example.com\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{usersurl}}/login",
+									"host": [
+										"{{usersurl}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 09:41:10 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "131"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: validate data failed: Key: 'LoginReq.Password' Error:Field validation for 'Password' failed on the 'required' tag\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Logut User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{usersurl}}/logout",
+							"host": [
+								"{{usersurl}}"
+							],
+							"path": [
+								"logout"
+							]
+						},
+						"description": "If want to logout just call an api to this route"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "localhost:5000/users_v1/logout",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"users_v1",
+										"logout"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "accessToken=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure"
+								},
+								{
+									"key": "Set-Cookie",
+									"value": "accessChecker=; Expires=Thu, 01 Jan 1970 00:00:00 GMT"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 09:42:21 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "25"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"logout success\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Favs User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "{{accessToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{usersurl}}/favs",
+							"host": [
+								"{{usersurl}}"
+							],
+							"path": [
+								"favs"
+							],
+							"query": [
+								{
+									"key": "accessToken",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all of the project that have been favorite by the user, the owner of the data is via to cookie."
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "localhost:5000/users_v1/favs",
+									"host": [
+										"localhost"
+									],
+									"port": "5000",
+									"path": [
+										"users_v1",
+										"favs"
+									],
+									"query": [
+										{
+											"key": "accessToken",
+											"value": "",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 31 Jan 2024 18:26:51 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1472"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"favs\": {\n        \"userId\": \"65b94263192fdc9412761367\",\n        \"projects\": [\n            {\n                \"id\": \"65b9427447017382a971d8ba\",\n                \"name\": \"CryptoCompany Inc.\",\n                \"banner_url\": \"https://example.com/banner.png\",\n                \"website_url\": \"https://cryptocompany.com\",\n                \"crypto_category\": \"Blockchain\",\n                \"description\": \"A leading company in the blockchain industry.\",\n                \"reason\": \"Innovative solutions and strong community support.\",\n                \"category\": \"Technology\",\n                \"contact\": \"info@cryptocompany.com\",\n                \"fav_count\": 8,\n                \"created_by\": \"65b94263192fdc9412761367\",\n                \"created_at\": \"2024-01-30 18:39:48.316 +0000 UTC\"\n            },\n            {\n                \"id\": \"65b9f1900e06b9e5f2e626f2\",\n                \"name\": \"CryptoCompany Inc.\",\n                \"banner_url\": \"https://example.com/banner.png\",\n                \"website_url\": \"https://cryptocompany.com\",\n                \"crypto_category\": \"Blockchain\",\n                \"description\": \"A leading company in the blockchain industry.\",\n                \"reason\": \"Innovative solutions and strong community support.\",\n                \"category\": \"Technology\",\n                \"contact\": \"info@cryptocompany.com\",\n                \"fav_count\": 1,\n                \"created_by\": \"65b94263192fdc9412761367\",\n                \"created_at\": \"2024-01-31 07:06:56.124 +0000 UTC\"\n            },\n            {\n                \"id\": \"65b9f1de0e06b9e5f2e626f5\",\n                \"name\": \"CryptoCompany Inc.\",\n                \"banner_url\": \"https://example.com/banner.png\",\n                \"website_url\": \"https://cryptocompany.com\",\n                \"crypto_category\": \"Blockchain\",\n                \"description\": \"A leading company in the blockchain industry.\",\n                \"reason\": \"Innovative solutions and strong community support.\",\n                \"category\": \"Technology\",\n                \"contact\": \"info@cryptocompany.com\",\n                \"fav_count\": 1,\n                \"created_by\": \"65b94263192fdc9412761367\",\n                \"created_at\": \"2024-01-31 07:08:14.944 +0000 UTC\"\n            }\n        ]\n    },\n    \"msg\": \"ok\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "projects",
+			"item": [
+				{
+					"name": "Create Project",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "{{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"CryptoCompany Inc.\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"bannerUrl\": \"https://example.com/banner.png\",\n  \"websiteUrl\": \"https://cryptocompany.com\",\n  \"cryptoCategory\": \"Blockchain\",\n  \"description\": \"A leading company in the blockchain industry.\",\n  \"reason\": \"Innovative solutions and strong community support.\",\n  \"category\": \"Technology\",\n  \"contact\": \"info@cryptocompany.com\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{projecturl}}/create",
+							"host": [
+								"{{projecturl}}"
+							],
+							"path": [
+								"create"
+							]
+						},
+						"description": "All the field below this is required, otherwise will got a validation failed"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjI2MjIwNSwibmJmIjoxNzA2MTc1ODA1LCJpYXQiOjE3MDYxNzU4MDV9.pX0agTSOyXfI0Cm08YJAwhIIrFTzohNaJgvoP9-LmDb8_5stt7qVIlF0rZjg6e9wLfJUX9g3MDqPWliuqAN2xzAkjUlfg9mwPmCk_pRtpE30MJbLpygP20BFjXh5Y7D5_8UtqxLX_7AoCuj1yKkwZuAuf0gjvvMWE-DRTWPfKs0",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"CryptoCompany Inc.\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"bannerUrl\": \"https://example.com/banner.png\",\n  \"websiteUrl\": \"https://cryptocompany.com\",\n  \"cryptoCategory\": \"Blockchain\",\n  \"description\": \"A leading company in the blockchain industry.\",\n  \"reason\": \"Innovative solutions and strong community support.\",\n  \"category\": \"Technology\",\n  \"contact\": \"info@cryptocompany.com\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5001/project_v1/create",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"project_v1",
+										"create"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 16:17:49 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "543"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"ok\",\n    \"project\": {\n        \"_id\": \"65b289ad8938d1684640e76f\",\n        \"name\": \"CryptoCompany Inc.\",\n        \"logoUrl\": \"https://example.com/logo.png\",\n        \"bannerUrl\": \"https://example.com/banner.png\",\n        \"websiteUrl\": \"https://cryptocompany.com\",\n        \"cryptoCategory\": \"Blockchain\",\n        \"description\": \"A leading company in the blockchain industry.\",\n        \"reason\": \"Innovative solutions and strong community support.\",\n        \"category\": \"Technology\",\n        \"contact\": \"info@cryptocompany.com\",\n        \"createdBy\": \"65b22bdd9d60025ed5a82781\",\n        \"createdAt\": \"2024-01-25T16:17:49.201Z\",\n        \"updatedAt\": \"2024-01-25T16:17:49.201Z\"\n    }\n}"
+						},
+						{
+							"name": "400-validation-failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjI2MjIwNSwibmJmIjoxNzA2MTc1ODA1LCJpYXQiOjE3MDYxNzU4MDV9.pX0agTSOyXfI0Cm08YJAwhIIrFTzohNaJgvoP9-LmDb8_5stt7qVIlF0rZjg6e9wLfJUX9g3MDqPWliuqAN2xzAkjUlfg9mwPmCk_pRtpE30MJbLpygP20BFjXh5Y7D5_8UtqxLX_7AoCuj1yKkwZuAuf0gjvvMWE-DRTWPfKs0",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"CryptoCompany Inc.\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"bannerUrl\": \"https://example.com/banner.png\",\n  \"websiteUrl\": \"https://cryptocompany.com\",\n  \"cryptoCategory\": \"Blockchain\",\n  \"description\": \"A leading company in the blockchain industry.\",\n  \"reason\": \"Innovative solutions and strong community support.\",\n  \"category\": \"Technology\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{projecturl}}/create",
+									"host": [
+										"{{projecturl}}"
+									],
+									"path": [
+										"create"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 16:18:40 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "137"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: validate data failed: Key: 'InsertProjectReq.Contact' Error:Field validation for 'Contact' failed on the 'required' tag\"\n}"
+						},
+						{
+							"name": "401-unauthorized",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjI2MjIwNSwibmJmIjoxNzA2MTc1ODA1LCJpYXQiOjE3MDYxNzU4MDV9.pX0agTSOyXfI0Cm08YJAwhIIrFTzohNaJgvoP9-LmDb8_5stt7qVIlF0rZjg6e9wLfJUX9g3MDqPWliuqAN2xzAkjUlfg9mwPmCk_pRtpE30MJbLpygP20BFjXh5Y7D5_8UtqxLX_7AoCuj1yKkwZuAuf0gjvvMWE-DRTWPfKs0",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"CryptoCompany Inc.\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"bannerUrl\": \"https://example.com/banner.png\",\n  \"websiteUrl\": \"https://cryptocompany.com\",\n  \"cryptoCategory\": \"Blockchain\",\n  \"description\": \"A leading company in the blockchain industry.\",\n  \"reason\": \"Innovative solutions and strong community support.\",\n  \"category\": \"Technology\",\n  \"contact\": \"info@cryptocompany.com\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{projecturl}}/create",
+									"host": [
+										"{{projecturl}}"
+									],
+									"path": [
+										"create"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 16:17:30 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"token is required\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Proejct",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjQzNjQ3NSwibmJmIjoxNzA2MzUwMDc1LCJpYXQiOjE3MDYzNTAwNzV9.bL1wg8iNcWCEp6rkyFVHqpJu4t-XkGAr2gwLpLDUu7itov7jry7fTHx7qSDLz4m-WsuPPo3tmdMIyKFUvMHG3LJWrPWfL8jVyk14UtrWzooxFG4KkwOynhh16Jom-1uDVCFEHUqSf9NIWQcZaErCI41JcNPxhf9boTFtVRTcVTI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"CryptoCompany Update Inc.\",\n  \"logoUrl\": \"https://example.com/logo-update.png\",\n  \"bannerUrl\": \"https://example.com/banner-update.png\",\n  \"websiteUrl\": \"https://cryptocompany-update.com\",\n  \"cryptoCategory\": \"Blockchain-update\",\n  \"description\": \"A leading company in the blockchain industry-update.\",\n  \"reason\": \"Innovative solutions and strong community support-update.\",\n  \"category\": \"Technology-update\",\n  \"contact\": \"info@cryptocompany.com-update\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{projecturl}}/project/65b4d604d57f827f1f891cbc",
+							"host": [
+								"{{projecturl}}"
+							],
+							"path": [
+								"project",
+								"65b4d604d57f827f1f891cbc"
+							]
+						},
+						"description": "You need to be the owner of the project to update the project data"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjQzNjQ3NSwibmJmIjoxNzA2MzUwMDc1LCJpYXQiOjE3MDYzNTAwNzV9.bL1wg8iNcWCEp6rkyFVHqpJu4t-XkGAr2gwLpLDUu7itov7jry7fTHx7qSDLz4m-WsuPPo3tmdMIyKFUvMHG3LJWrPWfL8jVyk14UtrWzooxFG4KkwOynhh16Jom-1uDVCFEHUqSf9NIWQcZaErCI41JcNPxhf9boTFtVRTcVTI",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"CryptoCompany Update Inc.\",\n  \"logoUrl\": \"https://example.com/logo-update.png\",\n  \"bannerUrl\": \"https://example.com/banner-update.png\",\n  \"websiteUrl\": \"https://cryptocompany-update.com\",\n  \"cryptoCategory\": \"Blockchain-update\",\n  \"description\": \"A leading company in the blockchain industry-update.\",\n  \"reason\": \"Innovative solutions and strong community support-update.\",\n  \"category\": \"Technology-update\",\n  \"contact\": \"info@cryptocompany.com-update\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5001/project_v1/project/65b4d604d57f827f1f891cbc",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"project_v1",
+										"project",
+										"65b4d604d57f827f1f891cbc"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Jan 2024 16:11:18 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "753"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"ok\",\n    \"project\": {\n        \"_id\": \"65b4d604d57f827f1f891cbc\",\n        \"name\": \"CryptoCompany Update Inc.\",\n        \"logoUrl\": \"https://example.com/logo-update.png\",\n        \"bannerUrl\": \"https://example.com/banner-update.png\",\n        \"websiteUrl\": \"https://cryptocompany-update.com\",\n        \"cryptoCategory\": \"Blockchain-update\",\n        \"description\": \"A leading company in the blockchain industry-update.\",\n        \"reason\": \"Innovative solutions and strong community support-update.\",\n        \"category\": \"Technology-update\",\n        \"contact\": \"info@cryptocompany.com-update\",\n        \"favCount\": 0,\n        \"commentCount\": 0,\n        \"user\": {\n            \"userId\": \"65b22bdd9d60025ed5a82781\",\n            \"email\": \"mix@example.com\",\n            \"profile\": \"user\",\n            \"username\": \"john_doe\",\n            \"firstname\": \"John\",\n            \"lastname\": \"Doe\"\n        },\n        \"createdAt\": \"2024-01-27T17:08:04.202+07:00\",\n        \"updatedAt\": \"2024-01-27T23:11:18.091+07:00\"\n    }\n}"
+						},
+						{
+							"name": "401-unauthorized",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjQzNjQ3NSwibmJmIjoxNzA2MzUwMDc1LCJpYXQiOjE3MDYzNTAwNzV9.bL1wg8iNcWCEp6rkyFVHqpJu4t-XkGAr2gwLpLDUu7itov7jry7fTHx7qSDLz4m-WsuPPo3tmdMIyKFUvMHG3LJWrPWfL8jVyk14UtrWzooxFG4KkwOynhh16Jom-1uDVCFEHUqSf9NIWQcZaErCI41JcNPxhf9boTFtVRTcVTI",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"CryptoCompany Update Inc.\",\n  \"logoUrl\": \"https://example.com/logo-update.png\",\n  \"bannerUrl\": \"https://example.com/banner-update.png\",\n  \"websiteUrl\": \"https://cryptocompany-update.com\",\n  \"cryptoCategory\": \"Blockchain-update\",\n  \"description\": \"A leading company in the blockchain industry-update.\",\n  \"reason\": \"Innovative solutions and strong community support-update.\",\n  \"category\": \"Technology-update\",\n  \"contact\": \"info@cryptocompany.com-update\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5001/project_v1/project/65b4d604d57f827f1f891cbc",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"project_v1",
+										"project",
+										"65b4d604d57f827f1f891cbc"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Jan 2024 16:12:00 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"token is required\"\n}"
+						},
+						{
+							"name": "400-validation-failed",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjQzNjQ3NSwibmJmIjoxNzA2MzUwMDc1LCJpYXQiOjE3MDYzNTAwNzV9.bL1wg8iNcWCEp6rkyFVHqpJu4t-XkGAr2gwLpLDUu7itov7jry7fTHx7qSDLz4m-WsuPPo3tmdMIyKFUvMHG3LJWrPWfL8jVyk14UtrWzooxFG4KkwOynhh16Jom-1uDVCFEHUqSf9NIWQcZaErCI41JcNPxhf9boTFtVRTcVTI",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"CryptoCompany Update Inc.\",\n  \"logoUrl\": \"https://example.com/logo-update.png\",\n  \"bannerUrl\": \"https://example.com/banner-update.png\",\n  \"websiteUrl\": \"https://cryptocompany-update.com\",\n  \"cryptoCategory\": \"Blockchain-update\",\n  \"description\": \"A leading company in the blockchain industry-update.\",\n  \"reason\": \"Innovative solutions and strong community support-update.\",\n  \"category\": \"Technology-update\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:5001/project_v1/project/65b4d604d57f827f1f891cbc",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"project_v1",
+										"project",
+										"65b4d604d57f827f1f891cbc"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Jan 2024 16:12:24 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "137"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: validate data failed: Key: 'InsertProjectReq.Contact' Error:Field validation for 'Contact' failed on the 'required' tag\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get-Single-Project",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "{{accessToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{projecturl}}/project/65bfb881deca75d4441eb57b",
+							"host": [
+								"{{projecturl}}"
+							],
+							"path": [
+								"project",
+								"65bfb881deca75d4441eb57b"
+							]
+						},
+						"description": "Get single project data anyone can request to it, the data will base on the cookie that you have if you don't have the cookie you will be identify as not authentication user (mean that we will not check that you have put this project to favorite or not)"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "localhost:5001/project_v1/project/65b9427447017382a971d8ba",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"project_v1",
+										"project",
+										"65b9427447017382a971d8ba"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 01 Feb 2024 20:26:46 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1690"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"ok\",\n    \"project\": {\n        \"_id\": \"65b9427447017382a971d8ba\",\n        \"name\": \"CryptoCompany Inc.\",\n        \"logoUrl\": \"https://example.com/logo.png\",\n        \"bannerUrl\": \"https://example.com/banner.png\",\n        \"websiteUrl\": \"https://cryptocompany.com\",\n        \"cryptoCategory\": \"Blockchain\",\n        \"description\": \"A leading company in the blockchain industry.\",\n        \"reason\": \"Innovative solutions and strong community support.\",\n        \"category\": \"Technology\",\n        \"contact\": \"info@cryptocompany.com\",\n        \"favCount\": 8,\n        \"commentCount\": 3,\n        \"favOrNot\": true,\n        \"owner\": {\n            \"userId\": \"65b94263192fdc9412761367\",\n            \"email\": \"mix@example.com\",\n            \"profile\": \"user\",\n            \"username\": \"john_doe\",\n            \"firstname\": \"John\",\n            \"lastname\": \"Doe\"\n        },\n        \"comment\": [\n            {\n                \"commentId\": \"65ba96dcf01f6bf3064feb48\",\n                \"title\": \"changes title mix\",\n                \"content\": \"update content mix\",\n                \"createdBy\": {\n                    \"userId\": \"65b94263192fdc9412761367\",\n                    \"email\": \"mix@example.com\",\n                    \"profile\": \"user\",\n                    \"username\": \"john_doe\",\n                    \"firstname\": \"John\",\n                    \"lastname\": \"Doe\"\n                },\n                \"createdAt\": \"2024-01-31T18:52:12.978Z\",\n                \"updatedAt\": \"2024-01-31T19:04:01.782Z\"\n            },\n            {\n                \"commentId\": \"65ba97b0be2149719b19a959\",\n                \"title\": \"this is title\",\n                \"content\": \"this is content\",\n                \"createdBy\": {\n                    \"userId\": \"65b94263192fdc9412761367\",\n                    \"email\": \"mix@example.com\",\n                    \"profile\": \"user\",\n                    \"username\": \"john_doe\",\n                    \"firstname\": \"John\",\n                    \"lastname\": \"Doe\"\n                },\n                \"createdAt\": \"2024-01-31T18:55:44.733Z\",\n                \"updatedAt\": \"2024-01-31T18:55:44.733Z\"\n            },\n            {\n                \"commentId\": \"65ba97f65794a25475500fda\",\n                \"title\": \"this is title\",\n                \"content\": \"this is content\",\n                \"createdBy\": {\n                    \"userId\": \"65b94263192fdc9412761367\",\n                    \"email\": \"mix@example.com\",\n                    \"profile\": \"user\",\n                    \"username\": \"john_doe\",\n                    \"firstname\": \"John\",\n                    \"lastname\": \"Doe\"\n                },\n                \"createdAt\": \"2024-01-31T18:56:54.41Z\",\n                \"updatedAt\": \"2024-01-31T18:56:54.41Z\"\n            }\n        ],\n        \"createdAt\": \"2024-01-31T01:39:48.316+07:00\",\n        \"updatedAt\": \"2024-02-01T01:56:54.415+07:00\"\n    }\n}"
+						},
+						{
+							"name": "200-ok-no-authen",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "localhost:5001/project_v1/project/65bfb881deca75d4441eb57b",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"project_v1",
+										"project",
+										"65bfb881deca75d4441eb57b"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 04 Feb 2024 16:34:58 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "700"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"ok\",\n    \"project\": {\n        \"_id\": \"65bfb881deca75d4441eb57b\",\n        \"name\": \"Project599\",\n        \"logoUrl\": \"https://example.com/logo599.png\",\n        \"bannerUrl\": \"https://example.com/banner599.png\",\n        \"websiteUrl\": \"https://project599.com\",\n        \"cryptoCategory\": \"Blockchain\",\n        \"description\": \"Description for Project599\",\n        \"reason\": \"Reason for Project599\",\n        \"category\": \"Technology\",\n        \"contact\": \"info@project599.com\",\n        \"favCount\": 0,\n        \"commentCount\": 0,\n        \"favOrNot\": false,\n        \"owner\": {\n            \"userId\": \"65bfb881deca75d4441eb57a\",\n            \"email\": \"mix599@gmail.com\",\n            \"profile\": \"https://google.com\",\n            \"username\": \"mix599\",\n            \"firstname\": \"mix Firstname599\",\n            \"lastname\": \"mix LastName599\"\n        },\n        \"comment\": [],\n        \"createdAt\": \"2024-02-04T23:17:05.91+07:00\",\n        \"updatedAt\": \"2024-02-04T23:17:05.91+07:00\"\n    }\n}"
+						},
+						{
+							"name": "400-validate-failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjI2MjIwNSwibmJmIjoxNzA2MTc1ODA1LCJpYXQiOjE3MDYxNzU4MDV9.pX0agTSOyXfI0Cm08YJAwhIIrFTzohNaJgvoP9-LmDb8_5stt7qVIlF0rZjg6e9wLfJUX9g3MDqPWliuqAN2xzAkjUlfg9mwPmCk_pRtpE30MJbLpygP20BFjXh5Y7D5_8UtqxLX_7AoCuj1yKkwZuAuf0gjvvMWE-DRTWPfKs0",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"CryptoCompany Inc.\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"bannerUrl\": \"https://example.com/banner.png\",\n  \"websiteUrl\": \"https://cryptocompany.com\",\n  \"cryptoCategory\": \"Blockchain\",\n  \"description\": \"A leading company in the blockchain industry.\",\n  \"reason\": \"Innovative solutions and strong community support.\",\n  \"category\": \"Technology\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{projecturl}}/create",
+									"host": [
+										"{{projecturl}}"
+									],
+									"path": [
+										"create"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 16:18:40 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "137"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: validate data failed: Key: 'InsertProjectReq.Contact' Error:Field validation for 'Contact' failed on the 'required' tag\"\n}"
+						},
+						{
+							"name": "401-unauthorized",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWIyMmJkZDlkNjAwMjVlZDVhODI3ODEiLCJlbWFpbCI6Im1peEBleGFtcGxlLmNvbSIsInVzZXJuYW1lIjoiam9obl9kb2UiLCJzb3VyY2UiOiJ3ZWIiLCJwcm9maWxlIjoidXNlciIsImlzcyI6Im1peC5jb20iLCJzdWIiOiJhY2Nlc3NUb2tlbiIsImF1ZCI6WyJtaXguY29tIl0sImV4cCI6MTcwNjI2MjIwNSwibmJmIjoxNzA2MTc1ODA1LCJpYXQiOjE3MDYxNzU4MDV9.pX0agTSOyXfI0Cm08YJAwhIIrFTzohNaJgvoP9-LmDb8_5stt7qVIlF0rZjg6e9wLfJUX9g3MDqPWliuqAN2xzAkjUlfg9mwPmCk_pRtpE30MJbLpygP20BFjXh5Y7D5_8UtqxLX_7AoCuj1yKkwZuAuf0gjvvMWE-DRTWPfKs0",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"CryptoCompany Inc.\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"bannerUrl\": \"https://example.com/banner.png\",\n  \"websiteUrl\": \"https://cryptocompany.com\",\n  \"cryptoCategory\": \"Blockchain\",\n  \"description\": \"A leading company in the blockchain industry.\",\n  \"reason\": \"Innovative solutions and strong community support.\",\n  \"category\": \"Technology\",\n  \"contact\": \"info@cryptocompany.com\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{projecturl}}/create",
+									"host": [
+										"{{projecturl}}"
+									],
+									"path": [
+										"create"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 25 Jan 2024 16:17:30 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"token is required\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Project",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "{{accessToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{projecturl}}/project/65b289ad8938d1684640e76f",
+							"host": [
+								"{{projecturl}}"
+							],
+							"path": [
+								"project",
+								"65b289ad8938d1684640e76f"
+							]
+						},
+						"description": "You need to be the owner of the project to delete it"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "localhost:5001/project_v1/project/65b289ad8938d1684640e76f",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"project_v1",
+										"project",
+										"65b289ad8938d1684640e76f"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Jan 2024 16:26:29 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "25"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"delete success\"\n}"
+						},
+						{
+							"name": "400-not-found-or-no-permission",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{projecturl}}/project/65b289ad8938d1684640e76f",
+									"host": [
+										"{{projecturl}}"
+									],
+									"path": [
+										"project",
+										"65b289ad8938d1684640e76f"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Jan 2024 16:25:42 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "60"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: no dument found to delete or access denied\"\n}"
+						},
+						{
+							"name": "401-unauthorized",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"url": {
+									"raw": "{{projecturl}}/project/65b289ad8938d1684640e76f",
+									"host": [
+										"{{projecturl}}"
+									],
+									"path": [
+										"project",
+										"65b289ad8938d1684640e76f"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 27 Jan 2024 16:23:28 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"token is required\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Projetcs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "{{accessToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{projecturl}}/projects?limit=10&skip=0",
+							"host": [
+								"{{projecturl}}"
+							],
+							"path": [
+								"projects"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "skip",
+									"value": "0"
+								}
+							]
+						},
+						"description": "Get all of the project if no query of {limit and skip} the default value of limit = 40 and skip = 0\n\nYou can give any value of integer to the limit and skip query params"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "localhost:5001/project_v1/projects?limit=10&skip=0",
+									"host": [
+										"localhost"
+									],
+									"port": "5001",
+									"path": [
+										"project_v1",
+										"projects"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "skip",
+											"value": "0"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 04 Feb 2024 15:36:21 GMT"
+								},
+								{
+									"key": "Transfer-Encoding",
+									"value": "chunked"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"ok\",\n    \"project\": [\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c220\",\n            \"name\": \"Project599\",\n            \"logoUrl\": \"https://example.com/logo599.png\",\n            \"bannerUrl\": \"https://example.com/banner599.png\",\n            \"websiteUrl\": \"https://project599.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project599\",\n            \"reason\": \"Reason for Project599\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project599.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.9Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c21f\",\n            \"name\": \"Project598\",\n            \"logoUrl\": \"https://example.com/logo598.png\",\n            \"bannerUrl\": \"https://example.com/banner598.png\",\n            \"websiteUrl\": \"https://project598.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project598\",\n            \"reason\": \"Reason for Project598\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project598.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.9Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c21e\",\n            \"name\": \"Project597\",\n            \"logoUrl\": \"https://example.com/logo597.png\",\n            \"bannerUrl\": \"https://example.com/banner597.png\",\n            \"websiteUrl\": \"https://project597.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project597\",\n            \"reason\": \"Reason for Project597\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project597.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.9Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c21d\",\n            \"name\": \"Project596\",\n            \"logoUrl\": \"https://example.com/logo596.png\",\n            \"bannerUrl\": \"https://example.com/banner596.png\",\n            \"websiteUrl\": \"https://project596.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project596\",\n            \"reason\": \"Reason for Project596\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project596.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.9Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c21c\",\n            \"name\": \"Project595\",\n            \"logoUrl\": \"https://example.com/logo595.png\",\n            \"bannerUrl\": \"https://example.com/banner595.png\",\n            \"websiteUrl\": \"https://project595.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project595\",\n            \"reason\": \"Reason for Project595\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project595.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.9Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c1fd\",\n            \"name\": \"Project564\",\n            \"logoUrl\": \"https://example.com/logo564.png\",\n            \"bannerUrl\": \"https://example.com/banner564.png\",\n            \"websiteUrl\": \"https://project564.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project564\",\n            \"reason\": \"Reason for Project564\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project564.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.899Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c1fe\",\n            \"name\": \"Project565\",\n            \"logoUrl\": \"https://example.com/logo565.png\",\n            \"bannerUrl\": \"https://example.com/banner565.png\",\n            \"websiteUrl\": \"https://project565.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project565\",\n            \"reason\": \"Reason for Project565\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project565.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.899Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c1fc\",\n            \"name\": \"Project563\",\n            \"logoUrl\": \"https://example.com/logo563.png\",\n            \"bannerUrl\": \"https://example.com/banner563.png\",\n            \"websiteUrl\": \"https://project563.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project563\",\n            \"reason\": \"Reason for Project563\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project563.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.899Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c1ff\",\n            \"name\": \"Project566\",\n            \"logoUrl\": \"https://example.com/logo566.png\",\n            \"bannerUrl\": \"https://example.com/banner566.png\",\n            \"websiteUrl\": \"https://project566.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project566\",\n            \"reason\": \"Reason for Project566\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project566.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.899Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"_id\": \"65bf9ac56063a1ed6a73c1fb\",\n            \"name\": \"Project562\",\n            \"logoUrl\": \"https://example.com/logo562.png\",\n            \"bannerUrl\": \"https://example.com/banner562.png\",\n            \"websiteUrl\": \"https://project562.com\",\n            \"cryptoCategory\": \"Blockchain\",\n            \"description\": \"Description for Project562\",\n            \"reason\": \"Reason for Project562\",\n            \"category\": \"Technology\",\n            \"contact\": \"info@project562.com\",\n            \"favCount\": 0,\n            \"commentCount\": 0,\n            \"favOrNot\": false,\n            \"owner\": {\n                \"userId\": \"65b94263192fdc9412761367\",\n                \"email\": \"mix@example.com\",\n                \"profile\": \"user\",\n                \"username\": \"john_doe\",\n                \"firstname\": \"John\",\n                \"lastname\": \"Doe\"\n            },\n            \"createdAt\": \"2024-02-04T14:10:13.899Z\",\n            \"updatedAt\": \"0001-01-01T00:00:00Z\"\n        }\n    ]\n}"
+						},
+						{
+							"name": "400-validation-failed",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{projecturl}}/projects?limit=ds&skip=0",
+									"host": [
+										"{{projecturl}}"
+									],
+									"path": [
+										"projects"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "ds"
+										},
+										{
+											"key": "skip",
+											"value": "0"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 04 Feb 2024 15:37:02 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "33"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"limit incorrect format\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "favorites",
+			"item": [
+				{
+					"name": "push or pull fav",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "{{accessToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{favurl}}/push-pull-fav/65bfb881deca75d4441eb56d",
+							"host": [
+								"{{favurl}}"
+							],
+							"path": [
+								"push-pull-fav",
+								"65bfb881deca75d4441eb56d"
+							]
+						},
+						"description": "This route will check automatically check for you that have you ever put this project into the favorite before if it was your first time then the operation will be push but if you ever done it before it will be pull out from your favorite"
+					},
+					"response": [
+						{
+							"name": "401-unauthorized",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "/push-pull-fav/65b4d604d57f827f1f891cbc",
+									"path": [
+										"push-pull-fav",
+										"65b4d604d57f827f1f891cbc"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 28 Jan 2024 07:57:25 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"token is required\"\n}"
+						},
+						{
+							"name": "200-push-ok",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{favurl}}/push-pull-fav/65b4d604d57f827f1f891cbc",
+									"host": [
+										"{{favurl}}"
+									],
+									"path": [
+										"push-pull-fav",
+										"65b4d604d57f827f1f891cbc"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 28 Jan 2024 08:38:45 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "33"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"success\",\n    \"opera\": \"push\"\n}"
+						},
+						{
+							"name": "200-pull-ok",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{favurl}}/push-pull-fav/65b4d604d57f827f1f891cbc",
+									"host": [
+										"{{favurl}}"
+									],
+									"path": [
+										"push-pull-fav",
+										"65b4d604d57f827f1f891cbc"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 28 Jan 2024 08:39:01 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "33"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"success\",\n    \"opera\": \"pull\"\n}"
+						},
+						{
+							"name": "400-project not exist",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{favurl}}/push-pull-fav/65b4d604d57f827f1f891cbb",
+									"host": [
+										"{{favurl}}"
+									],
+									"path": [
+										"push-pull-fav",
+										"65b4d604d57f827f1f891cbb"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 28 Jan 2024 09:38:22 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"project you looking for is not exist\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "comments",
+			"item": [
+				{
+					"name": "push-comment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "{{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\":\"this is title\",\n    \"content\":\"this is content\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{commentUrl}}/push-comment/65b9427447017382a971d8ba",
+							"host": [
+								"{{commentUrl}}"
+							],
+							"path": [
+								"push-comment",
+								"65b9427447017382a971d8ba"
+							]
+						},
+						"description": "Push comment into the project, to push the project you need to be authentication first"
+					},
+					"response": [
+						{
+							"name": "200-Ok",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"this is title\",\n    \"content\":\"this is content\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/push-comment/65b9427447017382a971d8ba",
+									"path": [
+										"push-comment",
+										"65b9427447017382a971d8ba"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 31 Jan 2024 18:56:54 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "272"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"comment\": {\n        \"commentId\": \"65ba97f65794a25475500fda\",\n        \"title\": \"this is title\",\n        \"content\": \"this is content\",\n        \"created_by\": \"65b94263192fdc9412761367\",\n        \"created_at\": \"2024-02-01T01:56:54.410815+07:00\",\n        \"updated_at\": \"2024-02-01T01:56:54.410896+07:00\"\n    },\n    \"msg\": \"create comment success\"\n}"
+						},
+						{
+							"name": "400-project-not-found",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"this is title\",\n    \"content\":\"this is content\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{commentUrl}}/push-comment/65b770c2807784a87c89db16",
+									"host": [
+										"{{commentUrl}}"
+									],
+									"path": [
+										"push-comment",
+										"65b770c2807784a87c89db16"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 29 Jan 2024 09:48:26 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"project you looking for is not exist\"\n}"
+						},
+						{
+							"name": "401-unauthorized",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"this is title\",\n    \"content\":\"this is content\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{commentUrl}}/push-comment/65b770c2807784a87c89db18",
+									"host": [
+										"{{commentUrl}}"
+									],
+									"path": [
+										"push-comment",
+										"65b770c2807784a87c89db18"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 29 Jan 2024 09:48:59 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"token is required\"\n}"
+						},
+						{
+							"name": "400-validation failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"this is title\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{commentUrl}}/push-comment/65b770c2807784a87c89db18",
+									"host": [
+										"{{commentUrl}}"
+									],
+									"path": [
+										"push-comment",
+										"65b770c2807784a87c89db18"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Mon, 29 Jan 2024 09:49:13 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "135"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: validate data failed: Key: 'PushCommentReq.Content' Error:Field validation for 'Content' failed on the 'required' tag\"\n}"
+						}
+					]
+				},
+				{
+					"name": "update-comment",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "accessToken",
+								"value": "{{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\":\"changes title mix\",\n    \"content\":\"update content mix\" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{commentUrl}}/update-comment/65b9427447017382a971d8ba/65ba97b0be2149719b19a959",
+							"host": [
+								"{{commentUrl}}"
+							],
+							"path": [
+								"update-comment",
+								"65b9427447017382a971d8ba",
+								"65ba97b0be2149719b19a959"
+							]
+						},
+						"description": "If you want to update the comment you need to be the owner of the comment only to update the comment"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"changes title mix\",\n    \"content\":\"update content mix\" \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/update-comment/65b9427447017382a971d8ba/65ba97b0be2149719b19a959",
+									"path": [
+										"update-comment",
+										"65b9427447017382a971d8ba",
+										"65ba97b0be2149719b19a959"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 31 Jan 2024 19:04:01 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "821"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"comment\": {\n        \"projectId\": \"65b9427447017382a971d8ba\",\n        \"comments\": [\n            {\n                \"commentId\": \"65ba96dcf01f6bf3064feb48\",\n                \"title\": \"changes title mix\",\n                \"content\": \"update content mix\",\n                \"created_by\": \"65b94263192fdc9412761367\",\n                \"created_at\": \"2024-01-31T18:52:12.978Z\",\n                \"updated_at\": \"2024-01-31T19:04:01.782Z\"\n            },\n            {\n                \"commentId\": \"65ba97b0be2149719b19a959\",\n                \"title\": \"this is title\",\n                \"content\": \"this is content\",\n                \"created_by\": \"65b94263192fdc9412761367\",\n                \"created_at\": \"2024-01-31T18:55:44.733Z\",\n                \"updated_at\": \"2024-01-31T18:55:44.733Z\"\n            },\n            {\n                \"commentId\": \"65ba97f65794a25475500fda\",\n                \"title\": \"this is title\",\n                \"content\": \"this is content\",\n                \"created_by\": \"65b94263192fdc9412761367\",\n                \"created_at\": \"2024-01-31T18:56:54.41Z\",\n                \"updated_at\": \"2024-01-31T18:56:54.41Z\"\n            }\n        ],\n        \"created_at\": \"2024-01-30T18:39:48.351Z\",\n        \"updated_at\": \"2024-01-31T19:04:01.782Z\"\n    },\n    \"msg\": \"update comment success\"\n}"
+						},
+						{
+							"name": "401-unauthorized",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"changes title mix\",\n    \"content\":\"update content mix\" \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{commentUrl}}/update-comment/65b9427447017382a971d8ba/65ba97b0be2149719b19a959",
+									"host": [
+										"{{commentUrl}}"
+									],
+									"path": [
+										"update-comment",
+										"65b9427447017382a971d8ba",
+										"65ba97b0be2149719b19a959"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 31 Jan 2024 19:04:14 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"token is required\"\n}"
+						},
+						{
+							"name": "400-validation-failed",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "accessToken",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"changes title mix\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{commentUrl}}/update-comment/65b9427447017382a971d8ba/65ba97b0be2149719b19a959",
+									"host": [
+										"{{commentUrl}}"
+									],
+									"path": [
+										"update-comment",
+										"65b9427447017382a971d8ba",
+										"65ba97b0be2149719b19a959"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 31 Jan 2024 19:04:31 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "135"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: validate data failed: Key: 'PushCommentReq.Content' Error:Field validation for 'Content' failed on the 'required' tag\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "datacenter",
+			"item": [
+				{
+					"name": "insert-url",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"url\":\"https://api.thecatapi.com/v1/images/search?limit=10\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{datacenterurl}}/insert-url",
+							"host": [
+								"{{datacenterurl}}"
+							],
+							"path": [
+								"insert-url"
+							]
+						},
+						"description": "Insert the url that you want to cache the data of it"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"url\":\"google.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{datacenterurl}}/insert-url",
+									"host": [
+										"{{datacenterurl}}"
+									],
+									"path": [
+										"insert-url"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 02 Feb 2024 18:06:30 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "64"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"insert url success\",\n    \"urlId\": \"65bd2f26b7a2ac29eac72c1f\"\n}"
+						},
+						{
+							"name": "400-validation-failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/insert-url",
+									"path": [
+										"insert-url"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 02 Feb 2024 18:03:11 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "123"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: validate data failed: Key: 'CacheModel.Url' Error:Field validation for 'Url' failed on the 'required' tag\"\n}"
+						}
+					]
+				},
+				{
+					"name": "get-url",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{datacenterurl}}/get-url",
+							"host": [
+								"{{datacenterurl}}"
+							],
+							"path": [
+								"get-url"
+							]
+						},
+						"description": "Get all of the url that have been cache in the db"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/get-url",
+									"path": [
+										"get-url"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 03 Feb 2024 17:48:27 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "690"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"ok\",\n    \"urls\": [\n        {\n            \"urlId\": \"65be764e2624bcc1d6fec0e6\",\n            \"url\": \"https://api.thecatapi.com/v1/images/search?limit=10\",\n            \"createdAt\": \"0001-01-01T00:00:00Z\",\n            \"ureatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"urlId\": \"65be78132c1b426952dab83b\",\n            \"url\": \"https://api.thecatapi.com/v1/images/search?limit=10\",\n            \"createdAt\": \"0001-01-01T00:00:00Z\",\n            \"ureatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"urlId\": \"65be78272c1b426952dab83c\",\n            \"url\": \"https://api.thecatapi.com/v1/images/search?limit=10\",\n            \"createdAt\": \"0001-01-01T00:00:00Z\",\n            \"ureatedAt\": \"0001-01-01T00:00:00Z\"\n        },\n        {\n            \"urlId\": \"65be78512c1b426952dab83d\",\n            \"url\": \"https://api.thecatapi.com/v1/images/search?limit=10\",\n            \"createdAt\": \"0001-01-01T00:00:00Z\",\n            \"ureatedAt\": \"0001-01-01T00:00:00Z\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "trigger-update-cache",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{datacenterurl}}/trigger-update-cache/65be78512c1b426952dab83",
+							"host": [
+								"{{datacenterurl}}"
+							],
+							"path": [
+								"trigger-update-cache",
+								"65be78512c1b426952dab83"
+							]
+						},
+						"description": "Force the url to get update by request to this endpoint"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "/trigger-update-cache/65be78512c1b426952dab83d",
+									"path": [
+										"trigger-update-cache",
+										"65be78512c1b426952dab83d"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 03 Feb 2024 17:47:41 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "963"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"cacheData\": [\n        {\n            \"height\": 500,\n            \"id\": \"2dc\",\n            \"url\": \"https://cdn2.thecatapi.com/images/2dc.jpg\",\n            \"width\": 500\n        },\n        {\n            \"height\": 333,\n            \"id\": \"2k0\",\n            \"url\": \"https://cdn2.thecatapi.com/images/2k0.jpg\",\n            \"width\": 500\n        },\n        {\n            \"height\": 720,\n            \"id\": \"9oo\",\n            \"url\": \"https://cdn2.thecatapi.com/images/9oo.jpg\",\n            \"width\": 537\n        },\n        {\n            \"height\": 308,\n            \"id\": \"b8v\",\n            \"url\": \"https://cdn2.thecatapi.com/images/b8v.jpg\",\n            \"width\": 500\n        },\n        {\n            \"height\": 375,\n            \"id\": \"c6m\",\n            \"url\": \"https://cdn2.thecatapi.com/images/c6m.jpg\",\n            \"width\": 500\n        },\n        {\n            \"height\": 548,\n            \"id\": \"cbu\",\n            \"url\": \"https://cdn2.thecatapi.com/images/cbu.jpg\",\n            \"width\": 820\n        },\n        {\n            \"height\": 506,\n            \"id\": \"MTY4MDkyOA\",\n            \"url\": \"https://cdn2.thecatapi.com/images/MTY4MDkyOA.jpg\",\n            \"width\": 900\n        },\n        {\n            \"height\": 1024,\n            \"id\": \"MjA2MTUzNg\",\n            \"url\": \"https://cdn2.thecatapi.com/images/MjA2MTUzNg.jpg\",\n            \"width\": 683\n        },\n        {\n            \"height\": 1024,\n            \"id\": \"oGefY4YoG\",\n            \"url\": \"https://cdn2.thecatapi.com/images/oGefY4YoG.jpg\",\n            \"width\": 768\n        },\n        {\n            \"height\": 1080,\n            \"id\": \"5dF28H7__\",\n            \"url\": \"https://cdn2.thecatapi.com/images/5dF28H7__.jpg\",\n            \"width\": 1080\n        }\n    ],\n    \"msg\": \"ok\"\n}"
+						},
+						{
+							"name": "400-key-not-found",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"url": {
+									"raw": "{{datacenterurl}}/trigger-update-cache/65be78512c1b426952dab83",
+									"host": [
+										"{{datacenterurl}}"
+									],
+									"path": [
+										"trigger-update-cache",
+										"65be78512c1b426952dab83"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 03 Feb 2024 17:48:54 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "42"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: find one cache repo fail\"\n}"
+						}
+					]
+				},
+				{
+					"name": "get-cache",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{datacenterurl}}/get-cache/65be78512c1b426952dab83d",
+							"host": [
+								"{{datacenterurl}}"
+							],
+							"path": [
+								"get-cache",
+								"65be78512c1b426952dab83d"
+							]
+						},
+						"description": "Get the data of the url cache by using the cacheId"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/get-cache/65be701d4339aa8a9d0d159b",
+									"path": [
+										"get-cache",
+										"65be701d4339aa8a9d0d159b"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 03 Feb 2024 17:02:58 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "949"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"cacheData\": [\n        {\n            \"height\": 500,\n            \"id\": \"l7\",\n            \"url\": \"https://cdn2.thecatapi.com/images/l7.jpg\",\n            \"width\": 333\n        },\n        {\n            \"height\": 333,\n            \"id\": \"3ih\",\n            \"url\": \"https://cdn2.thecatapi.com/images/3ih.jpg\",\n            \"width\": 500\n        },\n        {\n            \"height\": 375,\n            \"id\": \"776\",\n            \"url\": \"https://cdn2.thecatapi.com/images/776.jpg\",\n            \"width\": 500\n        },\n        {\n            \"height\": 375,\n            \"id\": \"8mb\",\n            \"url\": \"https://cdn2.thecatapi.com/images/8mb.jpg\",\n            \"width\": 500\n        },\n        {\n            \"height\": 612,\n            \"id\": \"ajp\",\n            \"url\": \"https://cdn2.thecatapi.com/images/ajp.jpg\",\n            \"width\": 612\n        },\n        {\n            \"height\": 327,\n            \"id\": \"bgo\",\n            \"url\": \"https://cdn2.thecatapi.com/images/bgo.jpg\",\n            \"width\": 500\n        },\n        {\n            \"height\": 4891,\n            \"id\": \"da8\",\n            \"url\": \"https://cdn2.thecatapi.com/images/da8.jpg\",\n            \"width\": 3438\n        },\n        {\n            \"height\": 424,\n            \"id\": \"MTY4NTI1MQ\",\n            \"url\": \"https://cdn2.thecatapi.com/images/MTY4NTI1MQ.jpg\",\n            \"width\": 640\n        },\n        {\n            \"height\": 225,\n            \"id\": \"MTc2MzQ0NA\",\n            \"url\": \"https://cdn2.thecatapi.com/images/MTc2MzQ0NA.gif\",\n            \"width\": 400\n        },\n        {\n            \"height\": 1196,\n            \"id\": \"4-GdyX_fu\",\n            \"url\": \"https://cdn2.thecatapi.com/images/4-GdyX_fu.jpg\",\n            \"width\": 1048\n        }\n    ],\n    \"msg\": \"ok\"\n}"
+						},
+						{
+							"name": "400-key-not-found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{datacenterurl}}/get-cache/65be701d4339aa8a9d0d159",
+									"host": [
+										"{{datacenterurl}}"
+									],
+									"path": [
+										"get-cache",
+										"65be701d4339aa8a9d0d159"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 03 Feb 2024 17:45:41 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "55"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: get cache from redis failedredis: nil\"\n}"
+						}
+					]
+				},
+				{
+					"name": "delete-url",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{datacenterurl}}/delete-url/65be701d4339aa8a9d0d159b",
+							"host": [
+								"{{datacenterurl}}"
+							],
+							"path": [
+								"delete-url",
+								"65be701d4339aa8a9d0d159b"
+							]
+						},
+						"description": "Delete the url cache using the cacheId"
+					},
+					"response": [
+						{
+							"name": "200-ok",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "/delete-url/65bd2f26b7a2ac29eac72c1f",
+									"path": [
+										"delete-url",
+										"65bd2f26b7a2ac29eac72c1f"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 02 Feb 2024 18:07:25 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "29"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"delete url success\"\n}"
+						},
+						{
+							"name": "400-no-docs",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{datacenterurl}}/delete-url/65be701d4339aa8a9d0d159",
+									"host": [
+										"{{datacenterurl}}"
+									],
+									"path": [
+										"delete-url",
+										"65be701d4339aa8a9d0d159"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=UTF-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 03 Feb 2024 17:45:23 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "60"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"msg\": \"error: no dument found to delete or access denied\"\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}

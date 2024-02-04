@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-func (u *projectUsecase) assignProjectRes(data *datacenterPb.ProjectRes, fav bool, parsedTime time.Time) *project.ProjectRes {
-	return &project.ProjectRes{
+func (u *projectUsecase) assignProjectRes(data *datacenterPb.ProjectRes, fav bool, parsedTime time.Time, user *users.UserProfileRes) *project.ProjectResWithUser {
+	return &project.ProjectResWithUser{
 		Id:             data.Id,
 		Name:           data.Name,
 		LogoUrl:        data.LogoUrl,
@@ -24,9 +24,16 @@ func (u *projectUsecase) assignProjectRes(data *datacenterPb.ProjectRes, fav boo
 		Contact:        data.Contact,
 		FavCount:       data.FavCount,
 		CommentCount:   data.CommentCount,
-		CreatedBy:      data.CreatedBy,
-		CreatedAt:      parsedTime,
-		FavOrNot:       fav,
+		Owner: users.UserProfileRes{
+			Id:        user.Id,
+			Email:     user.Email,
+			Profile:   user.Profile,
+			Username:  user.Username,
+			Firstname: user.Firstname,
+			Lastname:  user.Lastname,
+		},
+		CreatedAt: parsedTime,
+		FavOrNot:  fav,
 	}
 }
 
@@ -57,7 +64,7 @@ func (u *projectUsecase) convertPModelToPWithUser(m *project.ProjectModel, us *u
 			Firstname: us.FirstName,
 			Lastname:  us.LastName,
 		},
-		CreateAt:  m.CreateAt.In(loc),
+		CreatedAt: m.CreateAt.In(loc),
 		UpdatedAt: m.UpdatedAt.In(loc),
 	}, nil
 }
@@ -131,6 +138,14 @@ func (u *projectUsecase) accumateUserId(rawC *comment.CommentModel) []string {
 	createdBy := make([]string, 0)
 
 	for _, v := range rawC.Comments {
+		createdBy = append(createdBy, v.CreatedBy)
+	}
+	return createdBy
+}
+
+func (u *projectUsecase) accumateUserIdByProjects(rawP *datacenterPb.GetProjectDataCenterRes) []string {
+	createdBy := make([]string, 0)
+	for _, v := range rawP.Projects {
 		createdBy = append(createdBy, v.CreatedBy)
 	}
 	return createdBy

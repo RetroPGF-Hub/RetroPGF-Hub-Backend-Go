@@ -159,7 +159,7 @@ func (h *projectHttpHandler) FindAllProeject(c echo.Context) error {
 		skip = parsedSkip
 	}
 
-	projects, err := h.projectUsecase.FindAllProjectDatacenterUsecase(ctx, &h.cfg.Grpc, int64(limit), int64(skip), userId)
+	projects, err := h.projectUsecase.FindAllProjectUsecase(ctx, &h.cfg.Grpc, int64(limit), int64(skip), userId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}

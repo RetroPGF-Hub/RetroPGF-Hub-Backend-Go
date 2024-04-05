@@ -1,0 +1,17 @@
+.git
+.gitignore
+ 
+LICENSE
+README.md
+MAKEFILE
+.air*
+ 
+*_test.go
+ 
+/build
+/assets
+
+RetroPFG-Hub-Backend.postman_collection.json
+RetroPFG-Hub-Backend.postman_collection.json
+generate-base.sh
+generate-module.sh

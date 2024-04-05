@@ -32,11 +32,15 @@ func NewMiddlewareHttpHandler(cfg *config.Config, middlewareUsecase middlewareus
 func (h *middlewareHttpHandler) JwtAuthorization(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		accessToken := c.Request().Header.Get("accessToken")
-		if len(accessToken) < 10 {
+		accessToken, err := c.Cookie("accessToken")
+		if err != nil {
+			return response.ErrResponse(c, http.StatusUnauthorized, err.Error())
+		}
+
+		if len(accessToken.Value) < 10 {
 			return response.ErrResponse(c, http.StatusUnauthorized, "token is required")
 		}
-		newCtx, err := h.middlewareUsecase.JwtAuthorization(c, h.cfg, accessToken)
+		newCtx, err := h.middlewareUsecase.JwtAuthorization(c, h.cfg, accessToken.Value)
 		if err != nil {
 			return response.ErrResponse(c, http.StatusUnauthorized, err.Error())
 		}

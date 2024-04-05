@@ -17,6 +17,6 @@ func NewfavGrpcHandler(favUsecase favoriteusecase.FavoriteUsecaseService) *favGr
 	return &favGrpcHandler{favUsecase: favUsecase}
 }
 
-func (g *favGrpcHandler) GetAllFavByUserId(pctx context.Context, req *favPb.GetAllFavReq) (*favPb.GetAllFavRes, error) {
+func (g *favGrpcHandler) GetAllFavByUserId(pctx context.Context, req *favPb.GetAllFavProjectReq) (*favPb.GetAllFavRes, error) {
 	return g.favUsecase.GetAllProjectByUserId(pctx, req)
 }

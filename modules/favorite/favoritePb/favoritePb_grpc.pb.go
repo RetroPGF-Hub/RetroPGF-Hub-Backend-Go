@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FavGrpcServiceClient interface {
-	GetAllFavByUserId(ctx context.Context, in *GetAllFavReq, opts ...grpc.CallOption) (*GetAllFavRes, error)
+	GetAllFavByUserId(ctx context.Context, in *GetAllFavProjectReq, opts ...grpc.CallOption) (*GetAllFavRes, error)
 }
 
 type favGrpcServiceClient struct {
@@ -33,7 +33,7 @@ func NewFavGrpcServiceClient(cc grpc.ClientConnInterface) FavGrpcServiceClient {
 	return &favGrpcServiceClient{cc}
 }
 
-func (c *favGrpcServiceClient) GetAllFavByUserId(ctx context.Context, in *GetAllFavReq, opts ...grpc.CallOption) (*GetAllFavRes, error) {
+func (c *favGrpcServiceClient) GetAllFavByUserId(ctx context.Context, in *GetAllFavProjectReq, opts ...grpc.CallOption) (*GetAllFavRes, error) {
 	out := new(GetAllFavRes)
 	err := c.cc.Invoke(ctx, "/FavGrpcService/GetAllFavByUserId", in, out, opts...)
 	if err != nil {
@@ -46,7 +46,7 @@ func (c *favGrpcServiceClient) GetAllFavByUserId(ctx context.Context, in *GetAll
 // All implementations must embed UnimplementedFavGrpcServiceServer
 // for forward compatibility
 type FavGrpcServiceServer interface {
-	GetAllFavByUserId(context.Context, *GetAllFavReq) (*GetAllFavRes, error)
+	GetAllFavByUserId(context.Context, *GetAllFavProjectReq) (*GetAllFavRes, error)
 	mustEmbedUnimplementedFavGrpcServiceServer()
 }
 
@@ -54,7 +54,7 @@ type FavGrpcServiceServer interface {
 type UnimplementedFavGrpcServiceServer struct {
 }
 
-func (UnimplementedFavGrpcServiceServer) GetAllFavByUserId(context.Context, *GetAllFavReq) (*GetAllFavRes, error) {
+func (UnimplementedFavGrpcServiceServer) GetAllFavByUserId(context.Context, *GetAllFavProjectReq) (*GetAllFavRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllFavByUserId not implemented")
 }
 func (UnimplementedFavGrpcServiceServer) mustEmbedUnimplementedFavGrpcServiceServer() {}
@@ -71,7 +71,7 @@ func RegisterFavGrpcServiceServer(s grpc.ServiceRegistrar, srv FavGrpcServiceSer
 }
 
 func _FavGrpcService_GetAllFavByUserId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAllFavReq)
+	in := new(GetAllFavProjectReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func _FavGrpcService_GetAllFavByUserId_Handler(srv interface{}, ctx context.Cont
 		FullMethod: "/FavGrpcService/GetAllFavByUserId",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FavGrpcServiceServer).GetAllFavByUserId(ctx, req.(*GetAllFavReq))
+		return srv.(FavGrpcServiceServer).GetAllFavByUserId(ctx, req.(*GetAllFavProjectReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

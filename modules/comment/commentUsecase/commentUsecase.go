@@ -14,7 +14,7 @@ import (
 type (
 	CommentUsecaseService interface {
 		PushCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId string) (*comment.CommentARes, error)
-		UpdateCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId, commentId string) (*comment.CommentRes, error)
+		UpdateCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId, commentId string) (*comment.CommentProjectRes, error)
 	}
 
 	commentUsecase struct {
@@ -53,7 +53,7 @@ func (u *commentUsecase) PushCommentUsecase(pctx context.Context, req *comment.P
 		return nil, err
 	}
 
-	if err := u.pActor.ProjectRepo.UpdateCommentCount(pctx, projectIdPri, 1); err != nil {
+	if err := u.pActor.ProjectRepo.UpdateProjectCommentCount(pctx, projectIdPri, 1); err != nil {
 		return nil, err
 	}
 
@@ -68,7 +68,7 @@ func (u *commentUsecase) PushCommentUsecase(pctx context.Context, req *comment.P
 
 }
 
-func (u *commentUsecase) UpdateCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId, commentId string) (*comment.CommentRes, error) {
+func (u *commentUsecase) UpdateCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId, commentId string) (*comment.CommentProjectRes, error) {
 
 	projectIdPri := utils.ConvertToObjectId(projectId)
 	countProject, err := u.pActor.CommentRepo.CountComment(pctx, projectIdPri)
@@ -92,10 +92,10 @@ func (u *commentUsecase) UpdateCommentUsecase(pctx context.Context, req *comment
 		return nil, err
 	}
 
-	var commentRes []comment.CommentARes
+	var CommentProjectRes []comment.CommentARes
 
 	for _, v := range comments.Comments {
-		commentRes = append(commentRes, comment.CommentARes{
+		CommentProjectRes = append(CommentProjectRes, comment.CommentARes{
 			CommentId: v.CommentId.Hex(),
 			Content:   v.Content,
 			Title:     v.Title,
@@ -104,10 +104,10 @@ func (u *commentUsecase) UpdateCommentUsecase(pctx context.Context, req *comment
 			UpdatedAt: v.UpdatedAt,
 		})
 	}
-	fmt.Println("data ->", commentRes)
-	return &comment.CommentRes{
+	fmt.Println("data ->", CommentProjectRes)
+	return &comment.CommentProjectRes{
 		ProjectId: comments.ProjectId.Hex(),
-		Comments:  commentRes,
+		Comments:  CommentProjectRes,
 		CreateAt:  comments.CreateAt,
 		UpdatedAt: comments.UpdatedAt,
 	}, nil

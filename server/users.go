@@ -27,8 +27,12 @@ func (s *server) usersService() {
 	}()
 
 	users := s.app.Group("/users_v1")
+	users.GET("/current-user", usersHttpHandler.GetCurrentUser, s.middleware.JwtAuthorization)
+	users.GET("/favs", usersHttpHandler.GetUserFav, s.middleware.JwtAuthorization)
+
+	users.GET("/logout", usersHttpHandler.LogOutUser)
+
+	users.POST("/auth-third-party", usersHttpHandler.RegisterOrLogin)
 	users.POST("/register", usersHttpHandler.RegisterUser)
 	users.POST("/login", usersHttpHandler.LoginUser)
-	users.GET("/logout", usersHttpHandler.LogOutUser)
-	users.GET("/favs", usersHttpHandler.GetUserFav, s.middleware.JwtAuthorization)
 }

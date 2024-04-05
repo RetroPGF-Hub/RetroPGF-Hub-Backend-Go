@@ -7,11 +7,18 @@ import (
 )
 
 type (
-	CommentModel struct {
+	CommentProjectModel struct {
 		ProjectId primitive.ObjectID `bson:"_id,omitempty"`
 		Comments  []CommentA         `bson:"comments"`
 		CreateAt  time.Time          `bson:"created_at"`
 		UpdatedAt time.Time          `bson:"updated_at"`
+	}
+
+	CommentQuestionModel struct {
+		QuestionId primitive.ObjectID `bson:"_id,omitempty"`
+		Comments   []CommentA         `bson:"comments"`
+		CreateAt   time.Time          `bson:"created_at"`
+		UpdatedAt  time.Time          `bson:"updated_at"`
 	}
 
 	CommentA struct {

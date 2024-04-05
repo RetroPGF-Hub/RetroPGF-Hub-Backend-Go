@@ -17,8 +17,10 @@ type (
 	UsersHttpHandlerService interface {
 		RegisterUser(c echo.Context) error
 		LoginUser(c echo.Context) error
+		RegisterOrLogin(c echo.Context) error
 		LogOutUser(c echo.Context) error
 		GetUserFav(c echo.Context) error
+		GetCurrentUser(c echo.Context) error
 	}
 
 	usersHttpHandler struct {
@@ -56,15 +58,16 @@ func (h *usersHttpHandler) RegisterUser(c echo.Context) error {
 		Name:     "accessToken",
 		Value:    token,
 		HttpOnly: true,
-		Secure:   true,
 		Expires:  oneWeek,
+		Path:     "/",
 	})
 	c.SetCookie(&http.Cookie{
 		Name:     "accessChecker",
 		Value:    res.Id,
-		HttpOnly: false,
-		Secure:   false,
 		Expires:  oneWeek,
+		HttpOnly: false,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
 	})
 
 	return response.SuccessResponse(c, http.StatusCreated, map[string]any{
@@ -91,20 +94,59 @@ func (h *usersHttpHandler) LoginUser(c echo.Context) error {
 	}
 
 	oneWeek := time.Now().Add(7 * 24 * time.Hour)
-
 	c.SetCookie(&http.Cookie{
 		Name:     "accessToken",
 		Value:    token,
 		HttpOnly: true,
-		Secure:   true,
 		Expires:  oneWeek,
+		Path:     "/",
 	})
 	c.SetCookie(&http.Cookie{
 		Name:     "accessChecker",
 		Value:    res.Id,
-		HttpOnly: false,
-		Secure:   false,
 		Expires:  oneWeek,
+		HttpOnly: false,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
+	})
+
+	return response.SuccessResponse(c, http.StatusOK, map[string]any{
+		"msg":  "ok",
+		"user": res,
+	})
+}
+
+func (h *usersHttpHandler) RegisterOrLogin(c echo.Context) error {
+	ctx := context.Background()
+
+	wrapper := request.NewContextWrapper(c)
+
+	req := new(users.RegisterUserReq)
+
+	if err := wrapper.Bind(req); err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	token, res, err := h.usersUsecase.RegisterOrLoginThridParty(h.cfg, ctx, req)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	oneWeek := time.Now().Add(7 * 24 * time.Hour)
+	c.SetCookie(&http.Cookie{
+		Name:     "accessToken",
+		Value:    token,
+		HttpOnly: true,
+		Expires:  oneWeek,
+		Path:     "/",
+	})
+	c.SetCookie(&http.Cookie{
+		Name:     "accessChecker",
+		Value:    res.Id,
+		Expires:  oneWeek,
+		HttpOnly: false,
+		SameSite: http.SameSiteLaxMode,
+		Path:     "/",
 	})
 
 	return response.SuccessResponse(c, http.StatusOK, map[string]any{
@@ -119,15 +161,15 @@ func (h *usersHttpHandler) LogOutUser(c echo.Context) error {
 		Name:     "accessToken",
 		Value:    "",
 		HttpOnly: true,
-		Secure:   true,
 		Expires:  time.Unix(0, 0),
+		Path:     "/",
 	})
 	c.SetCookie(&http.Cookie{
 		Name:     "accessChecker",
 		Value:    "",
 		HttpOnly: false,
-		Secure:   false,
 		Expires:  time.Unix(0, 0),
+		Path:     "/",
 	})
 
 	return response.SuccessResponse(c, http.StatusOK, map[string]any{
@@ -155,4 +197,22 @@ func (h *usersHttpHandler) GetUserFav(c echo.Context) error {
 		"favs": projects,
 	})
 
+}
+
+func (h *usersHttpHandler) GetCurrentUser(c echo.Context) error {
+	ctx := context.Background()
+	userId := c.Get("user_id").(string)
+	if len(userId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
+	}
+
+	user, err := h.usersUsecase.GetCurrentUserUsecase(ctx, userId)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	return response.SuccessResponse(c, http.StatusOK, map[string]any{
+		"msg":  "ok",
+		"user": user,
+	})
 }

@@ -18,10 +18,10 @@ type (
 		PushProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error)
 		PullProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error)
 		CountFav(pctx context.Context, userId primitive.ObjectID, projectId string) (int64, int64, error)
-		InsertOneFav(pctx context.Context, req *favorite.FavModel) error
+		InsertOneFav(pctx context.Context, req *favorite.FavProjectModel) error
 		DeleteFav(pctx context.Context, userId primitive.ObjectID) error
 		CountUserFav(pctx context.Context, userId primitive.ObjectID) (int64, error)
-		GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID) (*favorite.FavModel, error)
+		GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID) (*favorite.FavProjectModel, error)
 	}
 
 	favoriteRepository struct {
@@ -170,7 +170,7 @@ func (r *favoriteRepository) PullProjectToFav(pctx context.Context, projectId st
 	return "pull", nil
 }
 
-func (r *favoriteRepository) InsertOneFav(pctx context.Context, req *favorite.FavModel) error {
+func (r *favoriteRepository) InsertOneFav(pctx context.Context, req *favorite.FavProjectModel) error {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 	db := r.favoriteDbConn(ctx)
@@ -205,17 +205,21 @@ func (r *favoriteRepository) DeleteFav(pctx context.Context, userId primitive.Ob
 	return nil
 }
 
-func (r *favoriteRepository) GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID) (*favorite.FavModel, error) {
+func (r *favoriteRepository) GetAllProjectInUser(pctx context.Context, userId primitive.ObjectID) (*favorite.FavProjectModel, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 	db := r.favoriteDbConn(ctx)
 	col := db.Collection("favs")
 	filter := bson.M{"_id": userId}
 
-	result := new(favorite.FavModel)
+	result := new(favorite.FavProjectModel)
 
 	if err := col.FindOne(ctx, filter).Decode(result); err != nil {
-		return nil, errors.New("error: get all fav id not found")
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return &favorite.FavProjectModel{}, nil
+		} else {
+			return nil, errors.New("error: get all fav id not found")
+		}
 	}
 
 	return result, nil

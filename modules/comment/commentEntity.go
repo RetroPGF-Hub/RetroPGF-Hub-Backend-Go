@@ -14,11 +14,18 @@ type (
 		UpdatedAt time.Time `json:"updated_at"`
 	}
 
-	CommentRes struct {
+	CommentProjectRes struct {
 		ProjectId string        `json:"projectId"`
 		Comments  []CommentARes `json:"comments"`
 		CreateAt  time.Time     `json:"createdAt"`
 		UpdatedAt time.Time     `json:"updatedAt"`
+	}
+
+	CommentQuestionRes struct {
+		QuestionId string        `json:"questionId"`
+		Comments   []CommentARes `json:"comments"`
+		CreateAt   time.Time     `json:"createdAt"`
+		UpdatedAt  time.Time     `json:"updatedAt"`
 	}
 
 	CommentARes struct {

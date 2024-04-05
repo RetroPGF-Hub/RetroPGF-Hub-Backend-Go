@@ -9,6 +9,7 @@ import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
 	"context"
+	"fmt"
 	"sync"
 
 	datacenterPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/datacenter/datacenterPb"
@@ -23,7 +24,7 @@ type (
 		FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.FullProjectRes, error)
 		UpdateOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string, req *project.InsertProjectReq) (*project.ProjectResWithUser, error)
 		DeleteOneProjectUsecase(pctx context.Context, projectId, userId string) error
-		FindAllProjectDatacenterUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip int64, userId string) ([]*project.ProjectResWithUser, error)
+		FindAllProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip int64, userId string) ([]*project.ProjectResWithUser, error)
 	}
 
 	projectUsecase struct {
@@ -39,36 +40,34 @@ func NewProjectUsecase(pActor modules.ProjectSvcInteractor) ProjectUsecaseServic
 
 func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, req *project.InsertProjectReq) (*project.ProjectRes, error) {
 	projectId, err := u.pActor.ProjectRepo.InsertOneProject(pctx, &project.ProjectModel{
-		Id:             primitive.NewObjectID(),
-		Name:           req.Name,
-		LogoUrl:        req.LogoUrl,
-		FavCount:       0,
-		CommentCount:   0,
-		BannerUrl:      req.BannerUrl,
-		WebsiteUrl:     req.WebsiteUrl,
-		CryptoCategory: req.CryptoCategory,
-		Description:    req.Description,
-		Reason:         req.Reason,
-		Category:       req.Category,
-		Contact:        req.Contact,
-		CreatedBy:      req.CreatedBy,
-		CreateAt:       utils.LocalTime(),
-		UpdatedAt:      utils.LocalTime(),
+		Id:           primitive.NewObjectID(),
+		Name:         req.Name,
+		LogoUrl:      req.LogoUrl,
+		FavCount:     0,
+		CommentCount: 0,
+		GithubUrl:    req.GithubUrl,
+		WebsiteUrl:   req.WebsiteUrl,
+		Description:  req.Description,
+		Feedback:     req.Feedback,
+		Category:     req.Category,
+		CreatedBy:    req.CreatedBy,
+		CreateAt:     utils.LocalTime(),
+		UpdatedAt:    utils.LocalTime(),
 	})
 	if err != nil {
 		return nil, err
 	}
-
 	countU, err := u.pActor.FavoriteRepo.CountUserFav(pctx, utils.ConvertToObjectId(req.CreatedBy))
 	if err != nil {
 		if err := u.pActor.ProjectRepo.DeleteProject(pctx, projectId, req.CreatedBy); err != nil {
 			return nil, err
 		}
 	}
+	fmt.Println("this is countU", countU)
 	if countU == 0 {
 		// create empty docs to fav
 		// in case something wrong with this the project going to ge remove
-		if err := u.pActor.FavoriteRepo.InsertOneFav(pctx, &favorite.FavModel{
+		if err := u.pActor.FavoriteRepo.InsertOneFav(pctx, &favorite.FavProjectModel{
 			User:      utils.ConvertToObjectId(req.CreatedBy),
 			ProjectId: []string{},
 			CreateAt:  utils.LocalTime(),
@@ -93,7 +92,7 @@ func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, grpcCfg *
 	if countP == 0 {
 		// create empty docs to comment
 		// in case someething wrong with this the project going to ge remove
-		if err := u.pActor.CommentRepo.InsertEmptyComment(pctx, &comment.CommentModel{
+		if err := u.pActor.CommentRepo.InsertEmptyComment(pctx, &comment.CommentProjectModel{
 			ProjectId: projectId,
 			Comments:  []comment.CommentA{},
 			CreateAt:  utils.LocalTime(),
@@ -114,38 +113,39 @@ func (u *projectUsecase) CreateNewProjectUsecase(pctx context.Context, grpcCfg *
 		return nil, err
 	}
 
+	loc, err := utils.LocationTime()
+	if err != nil {
+		return nil, err
+	}
+
 	return &project.ProjectRes{
-		Id:             rawP.Projects.Id,
-		Name:           rawP.Projects.Name,
-		LogoUrl:        rawP.Projects.LogoUrl,
-		BannerUrl:      rawP.Projects.BannerUrl,
-		WebsiteUrl:     rawP.Projects.WebsiteUrl,
-		CryptoCategory: rawP.Projects.CryptoCategory,
-		Description:    rawP.Projects.Description,
-		Reason:         rawP.Projects.Reason,
-		Category:       rawP.Projects.Category,
-		FavCount:       rawP.Projects.FavCount,
-		CommentCount:   rawP.Projects.CommentCount,
-		Contact:        rawP.Projects.Contact,
-		CreatedBy:      rawP.Projects.CreatedBy,
-		CreatedAt:      utils.ConvertStringTimeToTime(rawP.Projects.CreatedAt),
-		UpdatedAt:      utils.ConvertStringTimeToTime(rawP.Projects.UpdatedAt),
+		Id:           rawP.Id.Hex(),
+		Name:         rawP.Name,
+		LogoUrl:      rawP.LogoUrl,
+		GithubUrl:    rawP.GithubUrl,
+		WebsiteUrl:   rawP.WebsiteUrl,
+		Description:  rawP.Description,
+		Feedback:     rawP.Feedback,
+		Category:     rawP.Category,
+		FavCount:     rawP.FavCount,
+		CommentCount: rawP.CommentCount,
+		CreatedBy:    rawP.CreatedBy,
+		CreatedAt:    rawP.CreateAt.In(loc),
+		UpdatedAt:    rawP.UpdatedAt.In(loc),
 	}, nil
 }
 
 func (u *projectUsecase) UpdateOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string, req *project.InsertProjectReq) (*project.ProjectResWithUser, error) {
 	projectD, err := u.pActor.ProjectRepo.UpdateProject(pctx, &project.ProjectModel{
-		Id:             utils.ConvertToObjectId(projectId),
-		Name:           req.Name,
-		LogoUrl:        req.LogoUrl,
-		BannerUrl:      req.BannerUrl,
-		WebsiteUrl:     req.WebsiteUrl,
-		CryptoCategory: req.CryptoCategory,
-		Description:    req.Description,
-		Reason:         req.Reason,
-		Category:       req.Category,
-		Contact:        req.Contact,
-		UpdatedAt:      utils.LocalTime(),
+		Id:          utils.ConvertToObjectId(projectId),
+		Name:        req.Name,
+		LogoUrl:     req.LogoUrl,
+		GithubUrl:   req.GithubUrl,
+		WebsiteUrl:  req.WebsiteUrl,
+		Description: req.Description,
+		Feedback:    req.Feedback,
+		Category:    req.Category,
+		UpdatedAt:   utils.LocalTime(),
 	}, userId)
 	if err != nil {
 		return nil, err
@@ -178,7 +178,7 @@ func (u *projectUsecase) DeleteOneProjectUsecase(pctx context.Context, projectId
 	return nil
 }
 
-func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip int64, userId string) ([]*project.ProjectResWithUser, error) {
+func (u *projectUsecase) FindAllProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip int64, userId string) ([]*project.ProjectResWithUser, error) {
 	rawProjects, err := u.pActor.ProjectRepo.FindAllProjectDatacenter(pctx, grpcCfg.DatacenterUrl, &datacenterPb.GetProjectDataCenterReq{
 		Limit: limit,
 		Skip:  skip,
@@ -194,7 +194,10 @@ func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, g
 	}
 
 	var projectRes []*project.ProjectResWithUser
-
+	loc, err := utils.LocationTime()
+	if err != nil {
+		return nil, err
+	}
 	// authen user
 	if len(userId) > 5 {
 
@@ -203,8 +206,8 @@ func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, g
 			return nil, err
 		}
 
-		for _, p := range rawProjects.Projects {
-			parsedTime := utils.ConvertStringTimeToTime(p.CreatedAt)
+		for _, p := range rawProjects {
+			parsedTime := p.CreateAt.In(loc)
 			var wg sync.WaitGroup
 			var match bool
 
@@ -226,7 +229,7 @@ func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, g
 			wg.Wait()
 
 			for _, fp := range rawFav.ProjectId {
-				if p.Id == fp {
+				if p.Id.Hex() == fp {
 					projectRes = append(projectRes, u.assignProjectRes(p, true, parsedTime, owner))
 					match = true
 					break
@@ -240,7 +243,7 @@ func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, g
 		// unauthen user no check fav
 	} else {
 		var wg sync.WaitGroup
-		for _, p := range rawProjects.Projects {
+		for _, p := range rawProjects {
 
 			owner := new(users.UserProfileRes)
 			wg.Add(len(usersInfo.UsersProfile))
@@ -259,7 +262,7 @@ func (u *projectUsecase) FindAllProjectDatacenterUsecase(pctx context.Context, g
 			}
 			wg.Wait()
 
-			parsedTime := utils.ConvertStringTimeToTime(p.CreatedAt)
+			parsedTime := p.CreateAt.In(loc)
 			projectRes = append(projectRes, u.assignProjectRes(p, false, parsedTime, owner))
 		}
 	}
@@ -281,7 +284,7 @@ func (u *projectUsecase) FindOneProjectUsecase(pctx context.Context, grpcCfg *co
 
 	usersId := u.accumateUserId(rawComment)
 	// add the owner of the project to get the info of owner
-	usersId = append(usersId, projectD.Projects.CreatedBy)
+	usersId = append(usersId, projectD.CreatedBy)
 
 	usersInfo, err := u.pActor.ProjectRepo.FindManyUserInfo(pctx, grpcCfg.UserUrl, &usersPb.GetManyUserInfoForProjectReq{UsersId: usersId})
 	if err != nil {

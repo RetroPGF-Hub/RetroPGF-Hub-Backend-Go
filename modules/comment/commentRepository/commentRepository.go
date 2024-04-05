@@ -16,14 +16,14 @@ import (
 
 type (
 	CommentRepositoryService interface {
-		InsertEmptyComment(pctx context.Context, req *comment.CommentModel) error
+		InsertEmptyComment(pctx context.Context, req *comment.CommentProjectModel) error
 		PushComment(pctx context.Context, projectId primitive.ObjectID, req *comment.CommentA) error
 		PullComment(pctx context.Context, projectId primitive.ObjectID, commentId primitive.ObjectID) error
 		CountComment(pctx context.Context, projectId primitive.ObjectID) (int64, error)
 		CountCommentProject(pctx context.Context, projectId primitive.ObjectID) (int64, error)
-		UpdateComment(pctx context.Context, projectId primitive.ObjectID, req *comment.CommentA) (*comment.CommentModel, error)
+		UpdateComment(pctx context.Context, projectId primitive.ObjectID, req *comment.CommentA) (*comment.CommentProjectModel, error)
 		DeleteCommentDoc(pctx context.Context, projectId primitive.ObjectID) error
-		FindCommentByProjectId(pctx context.Context, projectId primitive.ObjectID) (*comment.CommentModel, error)
+		FindCommentByProjectId(pctx context.Context, projectId primitive.ObjectID) (*comment.CommentProjectModel, error)
 	}
 
 	commentRepository struct {
@@ -41,7 +41,7 @@ func NewCommentRepository(db *mongo.Client) CommentRepositoryService {
 	}
 }
 
-func (r *commentRepository) InsertEmptyComment(pctx context.Context, req *comment.CommentModel) error {
+func (r *commentRepository) InsertEmptyComment(pctx context.Context, req *comment.CommentProjectModel) error {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 	db := r.commentDbConn(ctx)
@@ -101,7 +101,7 @@ func (r *commentRepository) PullComment(pctx context.Context, projectId primitiv
 	return nil
 }
 
-func (r *commentRepository) UpdateComment(pctx context.Context, projectId primitive.ObjectID, req *comment.CommentA) (*comment.CommentModel, error) {
+func (r *commentRepository) UpdateComment(pctx context.Context, projectId primitive.ObjectID, req *comment.CommentA) (*comment.CommentProjectModel, error) {
 	ctx, cancel := context.WithTimeout(pctx, 15*time.Second)
 	defer cancel()
 
@@ -121,7 +121,7 @@ func (r *commentRepository) UpdateComment(pctx context.Context, projectId primit
 	// descending order
 	options := options.FindOneAndUpdate().SetSort(bson.D{{"comments.created_at", -1}}).SetReturnDocument(options.After)
 
-	updatedComment := new(comment.CommentModel)
+	updatedComment := new(comment.CommentProjectModel)
 	err := col.FindOneAndUpdate(ctx, filter, update, options).Decode(&updatedComment)
 	if err != nil {
 		log.Printf("Error: Update Comment Failed: %s", err.Error())
@@ -183,18 +183,22 @@ func (r *commentRepository) CountCommentProject(pctx context.Context, projectId 
 
 }
 
-func (r *commentRepository) FindCommentByProjectId(pctx context.Context, projectId primitive.ObjectID) (*comment.CommentModel, error) {
+func (r *commentRepository) FindCommentByProjectId(pctx context.Context, projectId primitive.ObjectID) (*comment.CommentProjectModel, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 
 	db := r.commentDbConn(ctx)
 	col := db.Collection("comments")
 
-	comment := new(comment.CommentModel)
-	if err := col.FindOne(pctx, bson.M{"_id": projectId}).Decode(&comment); err != nil {
-		return nil, errors.New("error: find comment by projectId failed")
+	commentData := new(comment.CommentProjectModel)
+	if err := col.FindOne(pctx, bson.M{"_id": projectId}).Decode(&commentData); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return &comment.CommentProjectModel{}, nil
+		} else {
+			return nil, errors.New("error: find comment by projectId failed")
+		}
 	}
 
-	return comment, nil
+	return commentData, nil
 
 }

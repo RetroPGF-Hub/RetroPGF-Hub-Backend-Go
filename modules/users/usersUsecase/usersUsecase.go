@@ -22,6 +22,8 @@ type (
 		FindUserByIdUsecase(pctx context.Context, req *usersPb.GetUserInfoReq) (*usersPb.GetUserInfoRes, error)
 		GetUserFavs(pctx context.Context, cfg *config.Grpc, userId string) (*favPb.GetAllFavRes, error)
 		FindManyUserIdUsecase(pctx context.Context, req *usersPb.GetManyUserInfoForProjectReq) (*usersPb.GetManyUserInfoForProjectRes, error)
+		GetCurrentUserUsecase(pctx context.Context, userId string) (*users.UserProfileRes, error)
+		RegisterOrLoginThridParty(cfg *config.Config, pctx context.Context, req *users.RegisterUserReq) (string, *users.UserProfileRes, error)
 	}
 
 	usersUsecase struct {
@@ -172,4 +174,118 @@ func (u *usersUsecase) FindManyUserIdUsecase(pctx context.Context, req *usersPb.
 	return &usersPb.GetManyUserInfoForProjectRes{
 		UsersProfile: usersRes,
 	}, nil
+}
+
+func (u *usersUsecase) GetCurrentUserUsecase(pctx context.Context, userId string) (*users.UserProfileRes, error) {
+
+	rawU, err := u.usersRepo.FindOneUserWithId(pctx, utils.ConvertToObjectId(userId))
+	if err != nil {
+		return nil, err
+	}
+
+	return &users.UserProfileRes{
+		Id:        rawU.Id.Hex(),
+		Email:     rawU.Email,
+		Profile:   rawU.Profile,
+		Username:  rawU.Username,
+		Firstname: rawU.Firstname,
+		Lastname:  rawU.Lastname,
+	}, nil
+
+}
+
+// for both case login or register because email and password will always be the same
+func (u *usersUsecase) RegisterOrLoginThridParty(cfg *config.Config, pctx context.Context, req *users.RegisterUserReq) (string, *users.UserProfileRes, error) {
+	exist, err := u.usersRepo.IsUniqueUser(pctx, req.Email)
+	if err != nil {
+		return "", nil, err
+	}
+	// email exist login case
+	if exist {
+		result, err := u.usersRepo.FindOneUserWithEmail(pctx, req.Email)
+		if err != nil {
+			return "", nil, err
+		}
+		if err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(req.Password)); err != nil {
+			return "", nil, errors.New("error: email or password invalid")
+		}
+
+		accessToken, err := jwtauth.NewAccessToken(
+			&cfg.Jwt,
+			&jwtauth.Claims{
+				UserId:   result.Id.Hex(),
+				Email:    result.Email,
+				Username: result.Username,
+				Source:   result.Source,
+				Profile:  result.Profile,
+			}, cfg.Jwt.AccessDuration, "accessToken").SignToken()
+		if err != nil {
+			return "", nil, err
+		}
+
+		return accessToken,
+			&users.UserProfileRes{
+				Email:     result.Email,
+				Profile:   result.Profile,
+				Username:  result.Username,
+				Firstname: result.Firstname,
+				Lastname:  result.Lastname,
+				Id:        result.Id.Hex(),
+			},
+			nil
+
+		// register case
+	} else {
+		hashPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return "", nil, errors.New("error: failed to hash password")
+		}
+
+		userId, err := u.usersRepo.InsertOneUser(pctx, &users.UserDb{
+			Id:        primitive.NewObjectID(),
+			Email:     req.Email,
+			Password:  string(hashPassword),
+			Source:    req.Source,
+			Profile:   req.Profile,
+			Username:  req.Username,
+			Firstname: req.Firstname,
+			Lastname:  req.Lastname,
+			CreateAt:  utils.LocalTime(),
+			UpdatedAt: utils.LocalTime(),
+		})
+
+		if err != nil {
+			return "", nil, err
+		}
+
+		user, err := u.usersRepo.FindOneUserWithIdWithPassword(pctx, userId)
+		if err != nil {
+			return "", nil, err
+		}
+
+		accessToken, err := jwtauth.NewAccessToken(
+			&cfg.Jwt,
+			&jwtauth.Claims{
+				UserId:   user.Id.Hex(),
+				Email:    user.Email,
+				Username: user.Username,
+				Source:   user.Source,
+				Profile:  user.Profile,
+			}, cfg.Jwt.AccessDuration, "accessToken").SignToken()
+		if err != nil {
+			return "", nil, err
+		}
+
+		return accessToken,
+			&users.UserProfileRes{
+				Email:     user.Email,
+				Profile:   user.Profile,
+				Username:  user.Username,
+				Firstname: user.Firstname,
+				Lastname:  user.Lastname,
+				Id:        user.Id.Hex(),
+			},
+			nil
+
+	}
 }

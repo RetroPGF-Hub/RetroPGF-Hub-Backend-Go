@@ -206,7 +206,7 @@ func (r *usersRepository) GetFavProjectByUserId(pctx context.Context, favGrpcUrl
 		return nil, errors.New("error: grpc connection to fav failed")
 	}
 
-	result, err := conn.Fav().GetAllFavByUserId(pctx, &favPb.GetAllFavReq{
+	result, err := conn.Fav().GetAllFavByUserId(pctx, &favPb.GetAllFavProjectReq{
 		UserId: userId,
 	})
 	if err != nil {

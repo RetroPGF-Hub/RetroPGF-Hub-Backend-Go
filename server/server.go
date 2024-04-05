@@ -79,6 +79,15 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 		middleware: newMiddleware(cfg),
 	}
 
+	// CORS
+	s.app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		Skipper:          middleware.DefaultSkipper,
+		AllowOrigins:     []string{"http://localhost:3000"}, // Specify the origin(s) of your React application
+		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowCredentials: true, // Enable credentials
+	}))
+
 	jwtauth.SetApiKey(&cfg.Jwt)
 
 	// Request Timeout
@@ -88,12 +97,7 @@ func Start(pctx context.Context, cfg *config.Config, db *mongo.Client) {
 		Timeout:      30 * time.Second,
 	}))
 
-	// CORS
-	s.app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		Skipper:      middleware.DefaultSkipper,
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE},
-	}))
+	// s.app.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	// Body Limit
 	s.app.Use(middleware.BodyLimit("10M"))

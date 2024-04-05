@@ -2,26 +2,26 @@ version: '3.9'
 name: retro-pgf-hub
 services:
 
-  users-db:
+  retro-db:
     image: mongo
-    container_name: users-db
+    container_name: retro-db
     ports:
     - 27017:27017
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 123456
     volumes:
-      - mongo_data:/var/lib/mongo/users
+      - mongo_data:/var/lib/mongo/retro-db
 
-  redis:
-    image: redis:alpine3.19
-    container_name: redis
-    ports:
-      - 6379:6379
-    volumes:  
-      - redis_data:/var/lib/redis
-      - ./redis.conf:/redis.conf
-    command: redis-server /redis.conf
+  # redis:
+  #   image: redis:alpine3.19
+  #   container_name: redis
+  #   ports:
+  #     - 6379:6379
+  #   volumes:  
+  #     - redis_data:/var/lib/redis
+  #     - ./redis.conf:/redis.conf
+  #   command: redis-server /redis.conf
 
 volumes:
   mongo_data:

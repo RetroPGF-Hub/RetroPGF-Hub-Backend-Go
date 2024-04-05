@@ -13,7 +13,7 @@ import (
 type (
 	FavoriteUsecaseService interface {
 		FavPullOrPushUsecase(pctx context.Context, projectId, userId string) (string, error)
-		GetAllProjectByUserId(pctx context.Context, req *favPb.GetAllFavReq) (*favPb.GetAllFavRes, error)
+		GetAllProjectByUserId(pctx context.Context, req *favPb.GetAllFavProjectReq) (*favPb.GetAllFavRes, error)
 	}
 
 	favoriteUsecase struct {
@@ -45,7 +45,7 @@ func (u *favoriteUsecase) FavPullOrPushUsecase(pctx context.Context, projectId, 
 			return push, err
 		}
 
-		if err := u.pActor.ProjectRepo.UpdateFavCount(pctx, projectIdPri, 1); err != nil {
+		if err := u.pActor.ProjectRepo.UpdateProjectFavCount(pctx, projectIdPri, 1); err != nil {
 			return push, err
 		}
 
@@ -55,7 +55,7 @@ func (u *favoriteUsecase) FavPullOrPushUsecase(pctx context.Context, projectId, 
 		if err != nil {
 			return pull, err
 		}
-		if err := u.pActor.ProjectRepo.UpdateFavCount(pctx, projectIdPri, -1); err != nil {
+		if err := u.pActor.ProjectRepo.UpdateProjectFavCount(pctx, projectIdPri, -1); err != nil {
 			return pull, err
 		}
 		opera = pull
@@ -63,13 +63,12 @@ func (u *favoriteUsecase) FavPullOrPushUsecase(pctx context.Context, projectId, 
 	return opera, nil
 }
 
-func (u *favoriteUsecase) GetAllProjectByUserId(pctx context.Context, req *favPb.GetAllFavReq) (*favPb.GetAllFavRes, error) {
+func (u *favoriteUsecase) GetAllProjectByUserId(pctx context.Context, req *favPb.GetAllFavProjectReq) (*favPb.GetAllFavRes, error) {
 
 	data, err := u.pActor.FavoriteRepo.GetAllProjectInUser(pctx, utils.ConvertToObjectId(req.UserId))
 	if err != nil {
 		return nil, err
 	}
-
 	var projectIds []primitive.ObjectID
 
 	for _, v := range data.ProjectId {
@@ -84,20 +83,18 @@ func (u *favoriteUsecase) GetAllProjectByUserId(pctx context.Context, req *favPb
 
 	for _, v := range projects {
 		projectsRes = append(projectsRes, &favPb.ProjectResForFav{
-			Id:             v.Id.Hex(),
-			Name:           v.Name,
-			LogoUrl:        v.LogoUrl,
-			BannerUrl:      v.BannerUrl,
-			WebsiteUrl:     v.WebsiteUrl,
-			CryptoCategory: v.CryptoCategory,
-			Description:    v.Description,
-			Reason:         v.Reason,
-			Category:       v.Category,
-			Contact:        v.Contact,
-			FavCount:       v.FavCount,
-			CommentCount:   v.CommentCount,
-			CreatedBy:      v.CreatedBy,
-			CreatedAt:      v.CreateAt.String(),
+			Id:           v.Id.Hex(),
+			Name:         v.Name,
+			LogoUrl:      v.LogoUrl,
+			GithubUrl:    v.GithubUrl,
+			WebsiteUrl:   v.WebsiteUrl,
+			Description:  v.Description,
+			Feedback:     v.Feedback,
+			Category:     v.Category,
+			FavCount:     v.FavCount,
+			CommentCount: v.CommentCount,
+			CreatedBy:    v.CreatedBy,
+			CreatedAt:    v.CreateAt.String(),
 		})
 	}
 

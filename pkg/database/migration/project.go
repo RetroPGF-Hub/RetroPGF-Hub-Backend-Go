@@ -44,21 +44,19 @@ func ProjectMigrate(pctx context.Context, cfg *config.Config) {
 
 		for i := 0; i < 1; i++ {
 			project := &project.ProjectModel{
-				Id:             primitive.NewObjectID(),
-				Name:           fmt.Sprintf("Project%d", i),
-				LogoUrl:        fmt.Sprintf("https://example.com/logo%d.png", i),
-				BannerUrl:      fmt.Sprintf("https://example.com/banner%d.png", i),
-				WebsiteUrl:     fmt.Sprintf("https://project%d.com", i),
-				CryptoCategory: "Blockchain",
-				Description:    fmt.Sprintf("Description for Project%d", i),
-				Reason:         fmt.Sprintf("Reason for Project%d", i),
-				Category:       "Technology",
-				Contact:        fmt.Sprintf("info@project%d.com", i),
-				FavCount:       0,
-				CommentCount:   0,
-				CreatedBy:      "65b94263192fdc9412761367",
-				CreateAt:       utils.LocalTime(),
-				UpdatedAt:      utils.LocalTime(),
+				Id:           primitive.NewObjectID(),
+				Name:         fmt.Sprintf("Project%d", i),
+				LogoUrl:      fmt.Sprintf("https://example.com/logo%d.png", i),
+				GithubUrl:    fmt.Sprintf("https://github.com/%d.png", i),
+				WebsiteUrl:   fmt.Sprintf("https://project%d.com", i),
+				Description:  fmt.Sprintf("Description for Project%d", i),
+				Feedback:     fmt.Sprintf("Feedback for Project%d", i),
+				Category:     "Technology",
+				FavCount:     0,
+				CommentCount: 0,
+				CreatedBy:    "65b94263192fdc9412761367",
+				CreateAt:     utils.LocalTime(),
+				UpdatedAt:    utils.LocalTime(),
 			}
 			projects = append(projects, project)
 		}

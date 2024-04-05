@@ -74,21 +74,19 @@ func (u *datacenterUsecase) GetSingleProjectUsecase(pctx context.Context, projec
 
 func (u *datacenterUsecase) convertToPbProject(p *project.ProjectModel) *datacenterPb.ProjectRes {
 	return &datacenterPb.ProjectRes{
-		Id:             p.Id.Hex(),
-		Name:           p.Name,
-		LogoUrl:        p.LogoUrl,
-		BannerUrl:      p.BannerUrl,
-		WebsiteUrl:     p.WebsiteUrl,
-		CryptoCategory: p.CryptoCategory,
-		Description:    p.Description,
-		Reason:         p.Reason,
-		Category:       p.Category,
-		Contact:        p.Contact,
-		FavCount:       p.FavCount,
-		CommentCount:   p.CommentCount,
-		CreatedBy:      p.CreatedBy,
-		CreatedAt:      p.CreateAt.String(),
-		UpdatedAt:      p.UpdatedAt.String(),
+		Id:           p.Id.Hex(),
+		Name:         p.Name,
+		LogoUrl:      p.LogoUrl,
+		GithubUrl:    p.GithubUrl,
+		WebsiteUrl:   p.WebsiteUrl,
+		Description:  p.Description,
+		Feedback:     p.Feedback,
+		Category:     p.Category,
+		FavCount:     p.FavCount,
+		CommentCount: p.CommentCount,
+		CreatedBy:    p.CreatedBy,
+		CreatedAt:    p.CreateAt.String(),
+		UpdatedAt:    p.UpdatedAt.String(),
 	}
 }
 

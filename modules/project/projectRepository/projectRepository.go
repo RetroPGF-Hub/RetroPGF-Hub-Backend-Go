@@ -31,7 +31,7 @@ type (
 		FindAllProjectDatacenter(pctx context.Context, grpcUrl string, limit, skip int64, userId, sort, category, search, projectType string) ([]*project.ProjectModel, error)
 		FindManyUserInfo(pctx context.Context, grpcUrl string, req *usersPb.GetManyUserInfoForProjectReq) (*usersPb.GetManyUserInfoForProjectRes, error)
 		FindLatestProjects(pctx context.Context, limit int, exceptProject primitive.ObjectID) ([]*project.ProjectModel, error)
-		CountProject(pctx context.Context, projectType string) (int64, error)
+		CountProject(pctx context.Context, projectType, category, title string) (int64, error)
 	}
 
 	projectRepository struct {
@@ -347,7 +347,6 @@ func (r *projectRepository) FindAllProjectDatacenter(pctx context.Context, grpcU
 
 	// if category = all we not going to add any match category
 	if category != "all" {
-
 		categoryMatchStage := bson.D{
 			{"$match", bson.M{
 				"category": category,
@@ -514,26 +513,55 @@ func (r *projectRepository) FindLatestProjects(pctx context.Context, limit int, 
 	return projects, nil
 }
 
-func (r *projectRepository) CountProject(pctx context.Context, projectType string) (int64, error) {
+func (r *projectRepository) CountProject(pctx context.Context, projectType, category, title string) (int64, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 	db := r.projectDbConn(ctx)
 	col := db.Collection("projects")
+	filter := bson.D{}
 
-	if projectType == "" {
-		count, err := col.CountDocuments(ctx, bson.M{})
-		if err != nil {
-			return 0, errors.New("error: count project failed")
-		}
-		return count, nil
-	} else {
-		count, err := col.CountDocuments(ctx, bson.M{
-			"type": projectType,
-		})
-		if err != nil {
-			return 0, errors.New("error: count project failed")
-		}
-		return count, nil
+	// Add filter for category if provided
+	if category != "all" {
+		filter = append(filter, bson.E{"category", category})
 	}
 
+	// Add filter for type if provided
+	if projectType != "" {
+		filter = append(filter, bson.E{"type", projectType})
+	}
+
+	if title != "" {
+		filter = append(filter, bson.E{"title", bson.M{"$regex": title, "$options": "i"}})
+	}
+
+	pipeline := []bson.M{
+		{
+			"$match": filter,
+		},
+		{
+			"$group": bson.M{
+				"_id":   nil,
+				"count": bson.M{"$sum": 1},
+			},
+		},
+	}
+
+	cursor, err := col.Aggregate(ctx, pipeline)
+	if err != nil {
+		return 0, errors.New("error: count project failed")
+	}
+	defer cursor.Close(ctx)
+
+	if !cursor.Next(ctx) {
+		return 0, nil
+	}
+
+	var result struct {
+		Count int64 `bson:"count"`
+	}
+	if err := cursor.Decode(&result); err != nil {
+		return 0, errors.New("error: count project failed")
+	}
+
+	return result.Count, nil
 }

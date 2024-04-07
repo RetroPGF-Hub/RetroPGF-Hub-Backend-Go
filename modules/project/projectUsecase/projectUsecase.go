@@ -295,7 +295,7 @@ func (u *projectUsecase) FindAllProjectUsecase(pctx context.Context, grpcCfg *co
 
 	var count int64 = pageCount
 	if count == 0 {
-		temp, err := u.pActor.ProjectRepo.CountProject(pctx, pjType)
+		temp, err := u.pActor.ProjectRepo.CountProject(pctx, pjType, category, search)
 		if err != nil {
 			return nil, temp, err
 		}

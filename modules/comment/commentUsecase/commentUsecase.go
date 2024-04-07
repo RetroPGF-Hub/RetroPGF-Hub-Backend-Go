@@ -1,8 +1,12 @@
 package commentusecase
 
 import (
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules"
+	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
+
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment"
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
 	"context"
 	"errors"
@@ -13,7 +17,7 @@ import (
 
 type (
 	CommentUsecaseService interface {
-		PushCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId string) (*comment.CommentARes, error)
+		PushCommentUsecase(grpcCfg *config.Grpc, pctx context.Context, req *comment.PushCommentReq, projectId string) (*comment.CommentAResWithUser, error)
 		UpdateCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId, commentId string) (*comment.CommentProjectRes, error)
 	}
 
@@ -28,7 +32,7 @@ func NewCommentUsecase(pActor modules.ProjectSvcInteractor) CommentUsecaseServic
 	}
 }
 
-func (u *commentUsecase) PushCommentUsecase(pctx context.Context, req *comment.PushCommentReq, projectId string) (*comment.CommentARes, error) {
+func (u *commentUsecase) PushCommentUsecase(grpcCfg *config.Grpc, pctx context.Context, req *comment.PushCommentReq, projectId string) (*comment.CommentAResWithUser, error) {
 
 	projectIdPri := utils.ConvertToObjectId(projectId)
 	countProject, err := u.pActor.CommentRepo.CountComment(pctx, projectIdPri)
@@ -43,9 +47,8 @@ func (u *commentUsecase) PushCommentUsecase(pctx context.Context, req *comment.P
 	commentId := primitive.NewObjectID()
 	commentA := new(comment.CommentA)
 	commentA.CommentId = commentId
-	commentA.Title = req.Title
 	commentA.Content = req.Content
-	commentA.CreatedBy = req.CreatedBy
+	commentA.CreatedBy = utils.ConvertToObjectId(req.CreatedBy)
 	commentA.CreateAt = utils.LocalTime()
 	commentA.UpdatedAt = utils.LocalTime()
 
@@ -57,11 +60,21 @@ func (u *commentUsecase) PushCommentUsecase(pctx context.Context, req *comment.P
 		return nil, err
 	}
 
-	return &comment.CommentARes{
+	// u.pActor.ProjectRepo.FindOneUserWithId(pctx, )
+	user, err := u.pActor.ProjectRepo.FindOneUserWithId(pctx, grpcCfg.UserUrl, &usersPb.GetUserInfoReq{
+		UserId: req.CreatedBy,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &comment.CommentAResWithUser{
 		CommentId: commentA.CommentId.Hex(),
-		Title:     commentA.Title,
 		Content:   commentA.Content,
-		CreatedBy: commentA.CreatedBy,
+		CreatedBy: users.SecureUserProfile{
+			Profile:  user.Profile,
+			Username: user.UserName,
+		},
 		CreateAt:  commentA.CreateAt,
 		UpdatedAt: commentA.UpdatedAt,
 	}, nil
@@ -82,9 +95,8 @@ func (u *commentUsecase) UpdateCommentUsecase(pctx context.Context, req *comment
 
 	comments, err := u.pActor.CommentRepo.UpdateComment(pctx, projectIdPri, &comment.CommentA{
 		CommentId: utils.ConvertToObjectId(commentId),
-		Title:     req.Title,
 		Content:   req.Content,
-		CreatedBy: req.CreatedBy,
+		CreatedBy: utils.ConvertToObjectId(req.CreatedBy),
 		CreateAt:  utils.LocalTime(),
 		UpdatedAt: utils.LocalTime(),
 	})
@@ -98,8 +110,7 @@ func (u *commentUsecase) UpdateCommentUsecase(pctx context.Context, req *comment
 		CommentProjectRes = append(CommentProjectRes, comment.CommentARes{
 			CommentId: v.CommentId.Hex(),
 			Content:   v.Content,
-			Title:     v.Title,
-			CreatedBy: v.CreatedBy,
+			CreatedBy: v.CreatedBy.Hex(),
 			CreateAt:  v.CreateAt,
 			UpdatedAt: v.UpdatedAt,
 		})

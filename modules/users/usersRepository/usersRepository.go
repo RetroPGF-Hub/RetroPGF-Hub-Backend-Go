@@ -118,7 +118,7 @@ func (r *usersRepository) FindOneUserWithEmail(pctx context.Context, email strin
 	result := new(users.UserDb)
 
 	if err := col.FindOne(ctx, bson.M{"email": email}).Decode(result); err != nil {
-		return nil, errors.New("error: id not found")
+		return nil, errors.New("error: email not found")
 	}
 
 	return result, nil

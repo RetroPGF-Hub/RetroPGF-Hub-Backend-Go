@@ -9,6 +9,7 @@ import (
 type (
 	InsertProjectReq struct {
 		Name        string `json:"name" validate:"required"`
+		Type        string `json:"type" validate:"required"`
 		LogoUrl     string `json:"logoUrl" validate:"required"`
 		GithubUrl   string `json:"githubUrl" validate:"required"`
 		WebsiteUrl  string `json:"websiteUrl" validate:"required"`
@@ -18,8 +19,17 @@ type (
 		CreatedBy   string `json:"createdBy"`
 	}
 
+	InsertQuestionReq struct {
+		Name        string `json:"name" validate:"required"`
+		Type        string `json:"type" validate:"required"`
+		Description string `json:"description" validate:"required"`
+		Category    string `json:"category" validate:"required"`
+		CreatedBy   string `json:"createdBy"`
+	}
+
 	ProjectRes struct {
 		Id           string    `json:"_id,omitempty"`
+		Type         string    `json:"type"`
 		Name         string    `json:"name"`
 		LogoUrl      string    `json:"logoUrl"`
 		GithubUrl    string    `json:"githubUrl"`
@@ -36,25 +46,27 @@ type (
 	}
 
 	ProjectResWithUser struct {
-		Id           string               `json:"_id,omitempty"`
-		Name         string               `json:"name"`
-		LogoUrl      string               `json:"logoUrl"`
-		GithubUrl    string               `json:"githubUrl"`
-		WebsiteUrl   string               `json:"websiteUrl"`
-		Description  string               `json:"description"`
-		Feedback     string               `json:"feedback"`
-		Category     string               `json:"category"`
-		FavCount     int64                `json:"favCount"`
-		CommentCount int64                `json:"commentCount"`
-		FavOrNot     bool                 `json:"favOrNot"`
-		Owner        users.UserProfileRes `json:"owner"`
-		CreatedAt    time.Time            `json:"createdAt"`
-		UpdatedAt    time.Time            `json:"updatedAt"`
+		Id           string                  `json:"_id,omitempty"`
+		Type         string                  `json:"type"`
+		Name         string                  `json:"name"`
+		LogoUrl      string                  `json:"logoUrl"`
+		GithubUrl    string                  `json:"githubUrl"`
+		WebsiteUrl   string                  `json:"websiteUrl"`
+		Description  string                  `json:"description"`
+		Feedback     string                  `json:"feedback"`
+		Category     string                  `json:"category"`
+		FavCount     int64                   `json:"favCount"`
+		CommentCount int64                   `json:"commentCount"`
+		FavOrNot     bool                    `json:"favOrNot"`
+		Owner        users.SecureUserProfile `json:"owner"`
+		CreatedAt    time.Time               `json:"createdAt"`
+		UpdatedAt    time.Time               `json:"updatedAt"`
 	}
 
 	FullProjectRes struct {
 		Id           string                        `json:"_id,omitempty"`
 		Name         string                        `json:"name"`
+		Type         string                        `json:"type"`
 		LogoUrl      string                        `json:"logoUrl"`
 		GithubUrl    string                        `json:"githubUrl"`
 		WebsiteUrl   string                        `json:"websiteUrl"`
@@ -64,48 +76,20 @@ type (
 		FavCount     int64                         `json:"favCount"`
 		CommentCount int64                         `json:"commentCount"`
 		FavOrNot     bool                          `json:"favOrNot"`
-		Owner        users.UserProfileRes          `json:"owner"`
+		Owner        users.SecureUserProfile       `json:"owner"`
 		Comment      []comment.CommentAResWithUser `json:"comment"`
 		CreateAt     time.Time                     `json:"createdAt"`
 		UpdatedAt    time.Time                     `json:"updatedAt"`
 	}
 
-	InsertQuestionReq struct {
-		Title     string `json:"title" validate:"required"`
-		Detail    string `json:"detail" validate:"required"`
-		CreatedBy string `json:"created_by" validate:"required"`
-	}
-
-	QuestionRes struct {
-		Id           string    `json:"_id,omitempty"`
-		Title        string    `json:"title"`
-		Detail       string    `json:"detail"`
-		CreateAt     time.Time `json:"created_at"`
-		UpdatedAt    time.Time `json:"updated_at"`
-		CreatedBy    string    `json:"createdBy"`
-		FavCount     int64     `json:"fav_count"`
-		CommentCount int64     `json:"comment_count"`
-	}
-	QuestionResWithUser struct {
-		Id           string               `json:"_id,omitempty"`
-		Title        string               `json:"title"`
-		Detail       string               `json:"detail"`
-		CreateAt     time.Time            `json:"created_at"`
-		UpdatedAt    time.Time            `json:"updated_at"`
-		Owner        users.UserProfileRes `json:"owner"`
-		FavCount     int64                `json:"fav_count"`
-		CommentCount int64                `json:"comment_count"`
-	}
-
-	FullQuestionRes struct {
-		Id           string                        `json:"_id,omitempty"`
-		Title        string                        `json:"title"`
-		Detail       string                        `json:"detail"`
-		CreateAt     time.Time                     `json:"created_at"`
-		UpdatedAt    time.Time                     `json:"updated_at"`
-		Owner        users.UserProfileRes          `json:"owner"`
-		Comment      []comment.CommentAResWithUser `json:"comment"`
-		FavCount     int64                         `json:"fav_count"`
-		CommentCount int64                         `json:"comment_count"`
+	RandomProjectDisplay struct {
+		Id           string `json:"_id,omitempty"`
+		Name         string `json:"name"`
+		Type         string `json:"type"`
+		LogoUrl      string `json:"logoUrl"`
+		Category     string `json:"category"`
+		Description  string `json:"description"`
+		FavCount     int64  `json:"favCount"`
+		CommentCount int64  `json:"commentCount"`
 	}
 )

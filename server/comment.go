@@ -8,7 +8,7 @@ import (
 func (s *server) commentService(commentUsecase *commentusecase.CommentUsecaseService) {
 	// commentRepo := commentrepository.NewCommentRepository(s.db)
 	// commentUsecase := commentusecase.NewCommentUsecase(commentRepo)
-	commentHttpHandler := commenthttphandler.NewCommentHttpHandler(*commentUsecase)
+	commentHttpHandler := commenthttphandler.NewCommentHttpHandler(*commentUsecase, s.cfg)
 
 	comments := s.app.Group("/comment_v1")
 	comments.POST("/push-comment/:projectId", commentHttpHandler.PushComment, s.middleware.JwtAuthorization)

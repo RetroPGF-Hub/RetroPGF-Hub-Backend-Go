@@ -11,6 +11,7 @@ type (
 		Id           primitive.ObjectID `bson:"_id,omitempty"`
 		Name         string             `bson:"name"`
 		LogoUrl      string             `bson:"logo_url"`
+		Type         string             `bson:"type"`
 		GithubUrl    string             `bson:"github_url"`
 		WebsiteUrl   string             `bson:"website_url"`
 		Description  string             `bson:"description"`
@@ -21,17 +22,6 @@ type (
 		CreatedBy    string             `bson:"created_by"`
 		CreateAt     time.Time          `bson:"created_at"`
 		UpdatedAt    time.Time          `bson:"updated_at"`
-	}
-
-	QuestionModel struct {
-		Id           primitive.ObjectID `bson:"_id,omitempty"`
-		Title        string             `bson:"title"`
-		Detail       string             `bson:"detail"`
-		CreateAt     time.Time          `bson:"created_at"`
-		UpdatedAt    time.Time          `bson:"updated_at"`
-		CreatedBy    string             `bson:"created_by"`
-		FavCount     int64              `bson:"fav_count"`
-		CommentCount int64              `bson:"comment_count"`
 	}
 )
 

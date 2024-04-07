@@ -16,6 +16,7 @@ import (
 type (
 	ProjectHttpHandlerService interface {
 		CreateNewProjectHttp(c echo.Context) error
+		CreateNewQuestionHttp(c echo.Context) error
 		FindOneProjectHttp(c echo.Context) error
 		UpdateOneProjectHttp(c echo.Context) error
 		DeleteOneProjectHttp(c echo.Context) error
@@ -64,6 +65,35 @@ func (h *projectHttpHandler) CreateNewProjectHttp(c echo.Context) error {
 
 }
 
+func (h *projectHttpHandler) CreateNewQuestionHttp(c echo.Context) error {
+
+	ctx := context.Background()
+
+	wrapper := request.NewContextWrapper(c)
+
+	req := new(project.InsertQuestionReq)
+
+	if err := wrapper.Bind(req); err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+	userId := c.Get("user_id").(string)
+	if len(userId) < 5 {
+		return response.ErrResponse(c, http.StatusBadRequest, "unauthorized user")
+	}
+
+	req.CreatedBy = userId
+	res, err := h.projectUsecase.CreateNewQuestionUsecase(ctx, &h.cfg.Grpc, req)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
+	return response.SuccessResponse(c, http.StatusOK, map[string]any{
+		"msg":     "ok",
+		"project": res,
+	})
+
+}
+
 func (h *projectHttpHandler) FindOneProjectHttp(c echo.Context) error {
 	ctx := context.Background()
 	projectId := c.Param("projectId")
@@ -72,15 +102,20 @@ func (h *projectHttpHandler) FindOneProjectHttp(c echo.Context) error {
 	}
 
 	userId := c.Get("user_id").(string)
-
 	res, err := h.projectUsecase.FindOneProjectUsecase(ctx, &h.cfg.Grpc, projectId, userId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
 
+	newest, err := h.projectUsecase.GetNewestProject(ctx, 3, projectId)
+	if err != nil {
+		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	}
+
 	return response.SuccessResponse(c, http.StatusOK, map[string]any{
-		"msg":     "ok",
-		"project": res,
+		"msg":      "ok",
+		"project":  res,
+		"recently": newest,
 	})
 }
 
@@ -138,10 +173,16 @@ func (h *projectHttpHandler) UpdateOneProjectHttp(c echo.Context) error {
 
 func (h *projectHttpHandler) FindAllProeject(c echo.Context) error {
 	ctx := context.Background()
-	var limit, skip int = 40, 0
+	var limit, skip, pageCount int = 10, 0, 0
 
 	limitStr := c.QueryParam("limit")
 	skipStr := c.QueryParam("skip")
+	sort := c.QueryParam("sort")
+	category := c.QueryParam("category")
+	search := c.QueryParam("search")
+	projectType := c.QueryParam("type")
+	pageCountStr := c.QueryParam("pagecount")
+
 	userId := c.Get("user_id").(string)
 	if limitStr != "" {
 		parsedLimit, err := strconv.Atoi(limitStr)
@@ -158,14 +199,26 @@ func (h *projectHttpHandler) FindAllProeject(c echo.Context) error {
 		}
 		skip = parsedSkip
 	}
+	if pageCountStr != "" {
+		parsedCount, err := strconv.Atoi(pageCountStr)
+		if err != nil {
+			return response.ErrResponse(c, http.StatusBadRequest, "page count incorrect format")
+		}
+		pageCount = parsedCount
+	}
 
-	projects, err := h.projectUsecase.FindAllProjectUsecase(ctx, &h.cfg.Grpc, int64(limit), int64(skip), userId)
+	if sort != "newest" && sort != "most popular" && sort != "most comment" && sort != "oldest" {
+		return response.ErrResponse(c, http.StatusBadRequest, "sort incorrect format")
+	}
+
+	projects, pageCounter, err := h.projectUsecase.FindAllProjectUsecase(ctx, &h.cfg.Grpc, int64(limit), int64(skip), int64(pageCount), userId, sort, category, search, projectType)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
 
 	return response.SuccessResponse(c, http.StatusOK, map[string]any{
-		"msg":     "ok",
-		"project": projects,
+		"msg":       "ok",
+		"project":   projects,
+		"pageCount": pageCounter,
 	})
 }

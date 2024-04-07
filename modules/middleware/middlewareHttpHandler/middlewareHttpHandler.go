@@ -4,7 +4,7 @@ import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
 	middlewareusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/middleware/middlewareUsecase"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/response"
-	"log"
+	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -34,7 +34,7 @@ func (h *middlewareHttpHandler) JwtAuthorization(next echo.HandlerFunc) echo.Han
 
 		accessToken, err := c.Cookie("accessToken")
 		if err != nil {
-			return response.ErrResponse(c, http.StatusUnauthorized, err.Error())
+			return response.ErrResponse(c, http.StatusUnauthorized, "authorization is required")
 		}
 
 		if len(accessToken.Value) < 10 {
@@ -51,19 +51,39 @@ func (h *middlewareHttpHandler) JwtAuthorization(next echo.HandlerFunc) echo.Han
 func (h *middlewareHttpHandler) JwtOptional(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		accessToken := c.Request().Header.Get("accessToken")
+		accessToken := c.Request().Header.Get("Authorization")
+		// token exist
 		if len(accessToken) > 10 {
-			log.Println("inside accessToken")
 			newCtx, err := h.middlewareUsecase.JwtAuthorization(c, h.cfg, accessToken)
 			if err != nil {
 				return response.ErrResponse(c, http.StatusUnauthorized, err.Error())
 			}
 			return next(newCtx)
+
+			// token doesn't exist
 		} else {
-			c.Set("user_id", "")
-			c.Set("email", "")
-			c.Set("source", "")
-			return next(c)
+			// fmt.Println("token doesn't exist")
+			subAccessToken, err := c.Cookie("accessToken")
+			if errors.Is(err, http.ErrNoCookie) {
+				c.Set("user_id", "")
+				c.Set("email", "")
+				c.Set("source", "")
+				return next(c)
+			}
+
+			if len(subAccessToken.Value) > 10 {
+				// fmt.Println("token exist")
+				newCtx, err := h.middlewareUsecase.JwtAuthorization(c, h.cfg, subAccessToken.Value)
+				if err != nil {
+					return response.ErrResponse(c, http.StatusUnauthorized, err.Error())
+				}
+				return next(newCtx)
+			} else {
+				c.Set("user_id", "")
+				c.Set("email", "")
+				c.Set("source", "")
+				return next(c)
+			}
 
 		}
 

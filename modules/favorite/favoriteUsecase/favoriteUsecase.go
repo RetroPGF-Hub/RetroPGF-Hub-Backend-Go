@@ -30,7 +30,7 @@ func NewFavoriteUsecase(pActor modules.ProjectSvcInteractor) FavoriteUsecaseServ
 func (u *favoriteUsecase) FavPullOrPushUsecase(pctx context.Context, projectId, userId string) (string, error) {
 	userIdPri := utils.ConvertToObjectId(userId)
 	projectIdPri := utils.ConvertToObjectId(projectId)
-	countP, countU, err := u.pActor.FavoriteRepo.CountFav(pctx, userIdPri, projectId)
+	countP, countU, err := u.pActor.FavoriteRepo.CountFav(pctx, userIdPri, projectIdPri)
 	if err != nil {
 		return "", err
 	}
@@ -40,7 +40,7 @@ func (u *favoriteUsecase) FavPullOrPushUsecase(pctx context.Context, projectId, 
 	}
 	var opera string
 	if countP == 0 {
-		push, err := u.pActor.FavoriteRepo.PushProjectToFav(pctx, projectId, userIdPri)
+		push, err := u.pActor.FavoriteRepo.PushProjectToFav(pctx, utils.ConvertToObjectId(projectId), userIdPri)
 		if err != nil {
 			return push, err
 		}
@@ -51,7 +51,7 @@ func (u *favoriteUsecase) FavPullOrPushUsecase(pctx context.Context, projectId, 
 
 		opera = push
 	} else {
-		pull, err := u.pActor.FavoriteRepo.PullProjectToFav(pctx, projectId, userIdPri)
+		pull, err := u.pActor.FavoriteRepo.PullProjectToFav(pctx, utils.ConvertToObjectId(projectId), userIdPri)
 		if err != nil {
 			return pull, err
 		}

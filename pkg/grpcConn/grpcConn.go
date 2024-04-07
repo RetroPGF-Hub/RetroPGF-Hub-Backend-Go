@@ -80,13 +80,13 @@ func (g *grpcAuth) unaryAuthorization(ctx context.Context, req any, info *grpc.U
 		return nil, errors.New("error: metadata is not found")
 	}
 
-	cliams, err := jwtauth.ParseToken(string(authHeader[0]), g.cfg)
+	_, err := jwtauth.ParseToken(string(authHeader[0]), g.cfg)
 	if err != nil {
 		log.Printf("Error: Parse Token Failed %s", err.Error())
 		return nil, errors.New("error: token is invalid")
 	}
 
-	log.Printf("Cliams %v", cliams)
+	// log.Printf("Cliams %v", cliams)
 	return handler(ctx, req)
 }
 

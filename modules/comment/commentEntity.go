@@ -7,7 +7,6 @@ import (
 
 type (
 	PushCommentReq struct {
-		Title     string    `json:"title" validate:"required"`
 		Content   string    `json:"content" validate:"required"`
 		CreatedBy string    `json:"created_by"`
 		CreateAt  time.Time `json:"created_at"`
@@ -30,7 +29,6 @@ type (
 
 	CommentARes struct {
 		CommentId string    `json:"commentId"`
-		Title     string    `json:"title"`
 		Content   string    `json:"content"`
 		CreatedBy string    `json:"createdBy"`
 		CreateAt  time.Time `json:"createdAt"`
@@ -38,11 +36,10 @@ type (
 	}
 
 	CommentAResWithUser struct {
-		CommentId string               `json:"commentId"`
-		Title     string               `json:"title"`
-		Content   string               `json:"content"`
-		CreatedBy users.UserProfileRes `json:"createdBy"`
-		CreateAt  time.Time            `json:"createdAt"`
-		UpdatedAt time.Time            `json:"updatedAt"`
+		CommentId string                  `json:"commentId"`
+		Content   string                  `json:"content"`
+		CreatedBy users.SecureUserProfile `json:"createdBy"`
+		CreateAt  time.Time               `json:"createdAt"`
+		UpdatedAt time.Time               `json:"updatedAt"`
 	}
 )

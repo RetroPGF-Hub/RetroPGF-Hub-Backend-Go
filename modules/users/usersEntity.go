@@ -20,6 +20,12 @@ type (
 		Lastname  string `json:"lastname"`
 	}
 
+	SecureUserProfile struct {
+		// Id       string `json:"userId"`
+		Profile  string `json:"profile"`
+		Username string `json:"username"`
+	}
+
 	LoginReq struct {
 		Email    string `json:"email" validate:"required,email,max=255"`
 		Password string `json:"password" validate:"required,max=128"`

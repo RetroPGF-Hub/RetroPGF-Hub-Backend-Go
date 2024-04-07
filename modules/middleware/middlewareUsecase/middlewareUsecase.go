@@ -28,6 +28,7 @@ func (u *middlewareUsecase) JwtAuthorization(c echo.Context, cfg *config.Config,
 		return nil, err
 	}
 
+	// fmt.Println("user id set ->", cliams.UserId)
 	c.Set("user_id", cliams.UserId)
 	c.Set("email", cliams.Email)
 	c.Set("source", cliams.Source)

@@ -1,6 +1,7 @@
 package commenthttphandler
 
 import (
+	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/config"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment"
 	commentusecase "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/comment/commentUsecase"
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/request"
@@ -19,12 +20,14 @@ type (
 
 	commentHttpHandler struct {
 		commentUsecase commentusecase.CommentUsecaseService
+		cfg            *config.Config
 	}
 )
 
-func NewCommentHttpHandler(commentUsecase commentusecase.CommentUsecaseService) CommentHttpHandlerService {
+func NewCommentHttpHandler(commentUsecase commentusecase.CommentUsecaseService, cfg *config.Config) CommentHttpHandlerService {
 	return &commentHttpHandler{
 		commentUsecase: commentUsecase,
+		cfg:            cfg,
 	}
 }
 
@@ -50,7 +53,7 @@ func (h *commentHttpHandler) PushComment(c echo.Context) error {
 
 	req.CreatedBy = userId
 
-	comment, err := h.commentUsecase.PushCommentUsecase(ctx, req, projectId)
+	comment, err := h.commentUsecase.PushCommentUsecase(&h.cfg.Grpc, ctx, req, projectId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}

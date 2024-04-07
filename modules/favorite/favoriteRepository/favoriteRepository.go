@@ -15,9 +15,10 @@ import (
 
 type (
 	FavoriteRepositoryService interface {
-		PushProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error)
-		PullProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error)
-		CountFav(pctx context.Context, userId primitive.ObjectID, projectId string) (int64, int64, error)
+		PushProjectToFav(pctx context.Context, projectId primitive.ObjectID, userId primitive.ObjectID) (string, error)
+		PullProjectToFav(pctx context.Context, projectId primitive.ObjectID, userId primitive.ObjectID) (string, error)
+		CountFav(pctx context.Context, userId primitive.ObjectID, projectId primitive.ObjectID) (int64, int64, error)
+		CountUserFavByProjectId(pctx context.Context, userId, projectId primitive.ObjectID) (int64, error)
 		InsertOneFav(pctx context.Context, req *favorite.FavProjectModel) error
 		DeleteFav(pctx context.Context, userId primitive.ObjectID) error
 		CountUserFav(pctx context.Context, userId primitive.ObjectID) (int64, error)
@@ -38,7 +39,7 @@ func NewFavoriteRepository(db *mongo.Client) FavoriteRepositoryService {
 		db: db,
 	}
 }
-func (r *favoriteRepository) CountFav(pctx context.Context, userId primitive.ObjectID, projectId string) (int64, int64, error) {
+func (r *favoriteRepository) CountFav(pctx context.Context, userId primitive.ObjectID, projectId primitive.ObjectID) (int64, int64, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 
@@ -128,7 +129,28 @@ func (r *favoriteRepository) CountUserFav(pctx context.Context, userId primitive
 	return count, nil
 }
 
-func (r *favoriteRepository) PushProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error) {
+func (r *favoriteRepository) CountUserFavByProjectId(pctx context.Context, userId, projectId primitive.ObjectID) (int64, error) {
+	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
+	defer cancel()
+	db := r.favoriteDbConn(ctx)
+	col := db.Collection("favs")
+
+	filter := bson.M{
+		"_id": userId,
+		"projects": bson.M{
+			"$elemMatch": bson.M{"$eq": projectId},
+		},
+	}
+
+	count, err := col.CountDocuments(ctx, filter)
+	if err != nil {
+		return -1, errors.New("error: count user fav failed")
+	}
+
+	return count, nil
+}
+
+func (r *favoriteRepository) PushProjectToFav(pctx context.Context, projectId primitive.ObjectID, userId primitive.ObjectID) (string, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 	db := r.favoriteDbConn(ctx)
@@ -150,7 +172,7 @@ func (r *favoriteRepository) PushProjectToFav(pctx context.Context, projectId st
 	return "push", nil
 }
 
-func (r *favoriteRepository) PullProjectToFav(pctx context.Context, projectId string, userId primitive.ObjectID) (string, error) {
+func (r *favoriteRepository) PullProjectToFav(pctx context.Context, projectId primitive.ObjectID, userId primitive.ObjectID) (string, error) {
 	ctx, cancel := context.WithTimeout(pctx, 10*time.Second)
 	defer cancel()
 	db := r.favoriteDbConn(ctx)

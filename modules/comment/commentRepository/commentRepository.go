@@ -112,7 +112,6 @@ func (r *commentRepository) UpdateComment(pctx context.Context, projectId primit
 	update := bson.M{
 		"$set": bson.M{
 			"updated_at":            utils.LocalTime(),
-			"comments.$.title":      req.Title,
 			"comments.$.content":    req.Content,
 			"comments.$.updated_at": utils.LocalTime(),
 		},

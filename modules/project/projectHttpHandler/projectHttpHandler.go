@@ -102,15 +102,15 @@ func (h *projectHttpHandler) FindOneProjectHttp(c echo.Context) error {
 	}
 
 	userId := c.Get("user_id").(string)
-	res, err := h.projectUsecase.FindOneProjectUsecase(ctx, &h.cfg.Grpc, projectId, userId)
+	res, err, newest := h.projectUsecase.FindOneProjectUsecase(ctx, &h.cfg.Grpc, projectId, userId)
 	if err != nil {
 		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
 	}
 
-	newest, err := h.projectUsecase.GetNewestProject(ctx, 3, projectId)
-	if err != nil {
-		return response.ErrResponse(c, http.StatusBadRequest, err.Error())
-	}
+	// newest, err := h.projectUsecase.GetNewestProject(ctx, 3, projectId)
+	// if err != nil {
+	// 	return response.ErrResponse(c, http.StatusBadRequest, err.Error())
+	// }
 
 	return response.SuccessResponse(c, http.StatusOK, map[string]any{
 		"msg":      "ok",

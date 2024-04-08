@@ -89,6 +89,7 @@ type (
 		LogoUrl      string `json:"logoUrl"`
 		Category     string `json:"category"`
 		Description  string `json:"description"`
+		FavOrNot     bool   `json:"favOrNot"`
 		FavCount     int64  `json:"favCount"`
 		CommentCount int64  `json:"commentCount"`
 	}

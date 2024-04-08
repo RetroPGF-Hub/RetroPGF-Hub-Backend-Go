@@ -10,7 +10,6 @@ import (
 	"RetroPGF-Hub/RetroPGF-Hub-Backend-Go/pkg/utils"
 	"context"
 	"fmt"
-	"sync"
 
 	usersPb "RetroPGF-Hub/RetroPGF-Hub-Backend-Go/modules/users/usersPb"
 
@@ -20,12 +19,12 @@ import (
 type (
 	ProjectUsecaseService interface {
 		CreateNewProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, req *project.InsertProjectReq) (*project.ProjectRes, error)
-		FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.FullProjectRes, error)
+		FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.FullProjectRes, error, []*project.RandomProjectDisplay)
 		UpdateOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string, req *project.InsertProjectReq) (*project.ProjectResWithUser, error)
 		DeleteOneProjectUsecase(pctx context.Context, projectId, userId string) error
 		FindAllProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, limit, skip, pageCount int64, userId, sort, category, search, projectType string) ([]*project.ProjectResWithUser, int64, error)
 		CreateNewQuestionUsecase(pctx context.Context, grpcCfg *config.Grpc, req *project.InsertQuestionReq) (*project.ProjectRes, error)
-		GetNewestProject(pctx context.Context, limit int64, exceptProjectId string) ([]*project.RandomProjectDisplay, error)
+		// GetNewestProject(pctx context.Context, limit int64, exceptProjectId string) ([]*project.RandomProjectDisplay, error)
 	}
 
 	projectUsecase struct {
@@ -329,25 +328,19 @@ func (u *projectUsecase) FindAllProjectUsecase(pctx context.Context, grpcCfg *co
 
 		for _, p := range rawProjects {
 			parsedTime := p.CreateAt.In(loc)
-			var wg sync.WaitGroup
 			var match bool
 
 			owner := new(users.UserProfileRes)
-			wg.Add(len(usersInfo.UsersProfile))
 			for _, v := range usersInfo.UsersProfile {
-				go func(v *usersPb.UserProfile) {
-					defer wg.Done()
-					if v.UserId == p.CreatedBy {
-						owner.Id = v.UserId
-						owner.Email = v.Email
-						owner.Firstname = v.FirstName
-						owner.Lastname = v.LastName
-						owner.Username = v.UserName
-						owner.Profile = v.Profile
-					}
-				}(v)
+				if v.UserId == p.CreatedBy {
+					owner.Id = v.UserId
+					owner.Email = v.Email
+					owner.Firstname = v.FirstName
+					owner.Lastname = v.LastName
+					owner.Username = v.UserName
+					owner.Profile = v.Profile
+				}
 			}
-			wg.Wait()
 
 			for _, fp := range rawFav.ProjectId {
 				if p.Id.Hex() == fp {
@@ -363,25 +356,19 @@ func (u *projectUsecase) FindAllProjectUsecase(pctx context.Context, grpcCfg *co
 
 		// unauthen user no check fav
 	} else {
-		var wg sync.WaitGroup
 		for _, p := range rawProjects {
 
 			owner := new(users.UserProfileRes)
-			wg.Add(len(usersInfo.UsersProfile))
 			for _, v := range usersInfo.UsersProfile {
-				go func(v *usersPb.UserProfile) {
-					defer wg.Done()
-					if v.UserId == p.CreatedBy {
-						owner.Id = v.UserId
-						owner.Email = v.Email
-						owner.Firstname = v.FirstName
-						owner.Lastname = v.LastName
-						owner.Username = v.UserName
-						owner.Profile = v.Profile
-					}
-				}(v)
+				if v.UserId == p.CreatedBy {
+					owner.Id = v.UserId
+					owner.Email = v.Email
+					owner.Firstname = v.FirstName
+					owner.Lastname = v.LastName
+					owner.Username = v.UserName
+					owner.Profile = v.Profile
+				}
 			}
-			wg.Wait()
 
 			parsedTime := p.CreateAt.In(loc)
 			projectRes = append(projectRes, u.assignProjectRes(p, false, parsedTime, owner))
@@ -391,16 +378,16 @@ func (u *projectUsecase) FindAllProjectUsecase(pctx context.Context, grpcCfg *co
 	return projectRes, count, nil
 }
 
-func (u *projectUsecase) FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.FullProjectRes, error) {
+func (u *projectUsecase) FindOneProjectUsecase(pctx context.Context, grpcCfg *config.Grpc, projectId, userId string) (*project.FullProjectRes, error, []*project.RandomProjectDisplay) {
 
 	projectD, err := u.pActor.ProjectRepo.FindOneProject(pctx, projectId, grpcCfg.DatacenterUrl)
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 
 	rawComment, err := u.pActor.CommentRepo.FindCommentByProjectId(pctx, utils.ConvertToObjectId(projectId))
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 
 	usersId := u.accumateUserId(rawComment)
@@ -409,28 +396,13 @@ func (u *projectUsecase) FindOneProjectUsecase(pctx context.Context, grpcCfg *co
 
 	usersInfo, err := u.pActor.ProjectRepo.FindManyUserInfo(pctx, grpcCfg.UserUrl, &usersPb.GetManyUserInfoForProjectReq{UsersId: usersId})
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 
-	if len(userId) > 5 {
-		countFav, err := u.pActor.FavoriteRepo.CountUserFavByProjectId(pctx, utils.ConvertToObjectId(userId), projectD.Id)
-		if err != nil {
-			return nil, err
-		}
-		var fav bool = false
-		if countFav != 0 {
-			fav = true
-		}
-		return u.convertPDatacenterToPWithUser(projectD, fav, rawComment, usersInfo.UsersProfile)
-	}
-
-	return u.convertPDatacenterToPWithUser(projectD, false, rawComment, usersInfo.UsersProfile)
-}
-
-func (u *projectUsecase) GetNewestProject(pctx context.Context, limit int64, exceptProjectId string) ([]*project.RandomProjectDisplay, error) {
-	rawP, err := u.pActor.ProjectRepo.FindLatestProjects(pctx, 3, utils.ConvertToObjectId(exceptProjectId))
+	// for the recently project on the side
+	rawP, err := u.pActor.ProjectRepo.FindLatestProjects(pctx, 3, utils.ConvertToObjectId(projectId))
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 
 	var projectRes []*project.RandomProjectDisplay
@@ -441,12 +413,73 @@ func (u *projectUsecase) GetNewestProject(pctx context.Context, limit int64, exc
 			Type:         v.Type,
 			LogoUrl:      v.LogoUrl,
 			Category:     v.Category,
+			FavOrNot:     false,
 			Description:  v.Description,
 			FavCount:     v.FavCount,
 			CommentCount: v.CommentCount,
 		})
 	}
 
-	return projectRes, nil
+	if len(userId) > 5 {
+		// countFav, err := u.pActor.FavoriteRepo.CountUserFavByProjectId(pctx, utils.ConvertToObjectId(userId), projectD.Id)
+		// if err != nil {
+		// 	return nil, err
+		// }
+		// var fav bool = false
+		// if countFav != 0 {
+		// 	fav = true
+		// }
 
+		// for the main project check for fav
+		rawFav, err := u.pActor.FavoriteRepo.GetAllProjectInUser(pctx, utils.ConvertToObjectId(userId))
+		if err != nil {
+			return nil, err, nil
+		}
+		var fav bool = false
+		// main project
+		for _, v := range rawFav.ProjectId {
+			if v == projectD.Id.Hex() {
+				fav = true
+				break
+			}
+		}
+		// recently project
+		for _, p := range projectRes {
+			for _, fp := range rawFav.ProjectId {
+				if p.Id == fp {
+					p.FavOrNot = true
+					break
+				}
+			}
+		}
+		ful, err := u.convertPDatacenterToPWithUser(projectD, fav, rawComment, usersInfo.UsersProfile)
+		return ful, err, projectRes
+	}
+	ful, err := u.convertPDatacenterToPWithUser(projectD, false, rawComment, usersInfo.UsersProfile)
+
+	return ful, err, projectRes
 }
+
+// func (u *projectUsecase) GetNewestProject(pctx context.Context, limit int64, exceptProjectId string) ([]*project.RandomProjectDisplay, error) {
+// 	rawP, err := u.pActor.ProjectRepo.FindLatestProjects(pctx, 3, utils.ConvertToObjectId(exceptProjectId))
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	var projectRes []*project.RandomProjectDisplay
+// 	for _, v := range rawP {
+// 		projectRes = append(projectRes, &project.RandomProjectDisplay{
+// 			Id:           v.Id.Hex(),
+// 			Name:         v.Name,
+// 			Type:         v.Type,
+// 			LogoUrl:      v.LogoUrl,
+// 			Category:     v.Category,
+// 			Description:  v.Description,
+// 			FavCount:     v.FavCount,
+// 			CommentCount: v.CommentCount,
+// 		})
+// 	}
+
+// 	return projectRes, nil
+
+// }
